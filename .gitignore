@@ -1,0 +1,8 @@
+# Database credentials
+src/com/revconnect/db/DBconfiguration.java
+
+# Eclipse files
+.classpath
+.project
+.settings/
+bin/
