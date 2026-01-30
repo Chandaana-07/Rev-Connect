@@ -1,6 +1,8 @@
 package com.revconnect.dao;
 
 import com.revconnect.model.User;
+import java.util.List;
+
 
 public interface UserDAO {
 
@@ -12,6 +14,7 @@ public interface UserDAO {
 
     // Profile & Search
     User getUserByUsername(String username);
+    User getUserByUsernameIgnoreCase(String username);
 
     // Duplicate checks
     User getUserByEmail(String email);
@@ -19,4 +22,7 @@ public interface UserDAO {
 
     // Forgot password
     boolean resetPassword(String email, String newPassword);
+    
+    List<User> searchUsers(String keyword);
+
 }

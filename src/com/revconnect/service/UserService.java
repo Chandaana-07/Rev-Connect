@@ -3,6 +3,8 @@ package com.revconnect.service;
 import com.revconnect.dao.UserDAO;
 import com.revconnect.dao.impl.UserDAOImpl;
 import com.revconnect.model.User;
+import java.util.List;
+
 
 public class UserService {
 
@@ -27,17 +29,20 @@ public class UserService {
         return dao.updateProfile(user);
     }
 
-    // ---------------- GET USER BY USERNAME ----------------
+    // ---------------- USER SEARCH ----------------
     public User getUserByUsername(String username) {
         return dao.getUserByUsername(username);
     }
 
-    // ---------------- DUPLICATE EMAIL CHECK ----------------
+    public User getUserByUsernameIgnoreCase(String username) {
+        return dao.getUserByUsernameIgnoreCase(username);
+    }
+
+    // ---------------- DUPLICATE CHECKS ----------------
     public boolean emailExists(String email) {
         return dao.getUserByEmail(email) != null;
     }
 
-    // ---------------- USERNAME CHECK ----------------
     public boolean usernameExists(String username) {
         return dao.getUserByUsernameExact(username) != null;
     }
@@ -46,4 +51,8 @@ public class UserService {
     public boolean resetPassword(String email, String newPassword) {
         return dao.resetPassword(email, newPassword);
     }
+    public List<User> searchUsers(String keyword) {
+        return dao.searchUsers(keyword);
+    }
+
 }

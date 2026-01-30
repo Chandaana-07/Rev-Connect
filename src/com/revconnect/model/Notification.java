@@ -1,12 +1,14 @@
 package com.revconnect.model;
 
+import java.sql.Timestamp;
+
 public class Notification {
 
     private int notifId;
     private int userId;
     private String message;
-    private int isRead;
-    private String createdAt;
+    private boolean isRead;
+    private Timestamp createdAt;
 
     public int getNotifId() {
         return notifId;
@@ -32,19 +34,19 @@ public class Notification {
         this.message = message;
     }
 
-    public int getIsRead() {
+    public boolean isRead() {
         return isRead;
     }
 
-    public void setIsRead(int isRead) {
+    public void setRead(boolean isRead) {
         this.isRead = isRead;
     }
 
-    public String getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 }

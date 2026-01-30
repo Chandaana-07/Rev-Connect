@@ -8,6 +8,9 @@ import com.revconnect.dao.UserDAO;
 import com.revconnect.db.DBConnection;
 import com.revconnect.model.User;
 import com.revconnect.util.PasswordUtil;
+import java.util.List;
+import java.util.ArrayList;
+
 
 public class UserDAOImpl implements UserDAO {
 
@@ -73,10 +76,7 @@ public class UserDAOImpl implements UserDAO {
             ps = con.prepareStatement(sql);
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getEmail());
-
-            // Store HASHED password, not plain text
             ps.setString(3, PasswordUtil.hashPassword(user.getPassword()));
-
             ps.setString(4, user.getRole());
 
             return ps.executeUpdate() > 0;
@@ -130,7 +130,7 @@ public class UserDAOImpl implements UserDAO {
         return false;
     }
 
-    // ---------------- GET USER BY USERNAME (PROFILE VIEW) ----------------
+    // ---------------- USER SEARCH (EXACT) ----------------
     @Override
     public User getUserByUsername(String username) {
 
@@ -176,7 +176,53 @@ public class UserDAOImpl implements UserDAO {
         return null;
     }
 
-    // ---------------- CHECK DUPLICATE EMAIL ----------------
+    // ---------------- USER SEARCH (CASE INSENSITIVE) ----------------
+    @Override
+    public User getUserByUsernameIgnoreCase(String username) {
+
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            con = DBConnection.getConnection();
+
+            String sql =
+                "SELECT USER_ID, USERNAME, EMAIL, BIO, LOCATION, WEBSITE " +
+                "FROM USERS WHERE UPPER(USERNAME) = UPPER(?)";
+
+            ps = con.prepareStatement(sql);
+            ps.setString(1, username);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                User user = new User();
+                user.setUserId(rs.getInt("USER_ID"));
+                user.setUsername(rs.getString("USERNAME"));
+                user.setEmail(rs.getString("EMAIL"));
+                user.setBio(rs.getString("BIO"));
+                user.setLocation(rs.getString("LOCATION"));
+                user.setWebsite(rs.getString("WEBSITE"));
+                return user;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return null;
+    }
+
+    // ---------------- DUPLICATE EMAIL ----------------
     @Override
     public User getUserByEmail(String email) {
 
@@ -218,45 +264,10 @@ public class UserDAOImpl implements UserDAO {
         return null;
     }
 
-    // ---------------- CHECK DUPLICATE USERNAME ----------------
+    // ---------------- DUPLICATE USERNAME ----------------
     @Override
     public User getUserByUsernameExact(String username) {
-
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-            con = DBConnection.getConnection();
-
-            String sql =
-                "SELECT USER_ID, USERNAME FROM USERS WHERE USERNAME = ?";
-
-            ps = con.prepareStatement(sql);
-            ps.setString(1, username);
-
-            rs = ps.executeQuery();
-
-            if (rs.next()) {
-                User user = new User();
-                user.setUserId(rs.getInt("USER_ID"));
-                user.setUsername(rs.getString("USERNAME"));
-                return user;
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return null;
+        return getUserByUsername(username);
     }
 
     // ---------------- FORGOT PASSWORD ----------------
@@ -291,4 +302,52 @@ public class UserDAOImpl implements UserDAO {
 
         return false;
     }
+    @Override
+    public List<User> searchUsers(String keyword) {
+
+        List<User> list = new ArrayList<User>();
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            con = DBConnection.getConnection();
+
+            String sql =
+                "SELECT USER_ID, USERNAME, EMAIL, BIO, LOCATION, WEBSITE " +
+                "FROM USERS " +
+                "WHERE LOWER(USERNAME) LIKE LOWER(?)";
+
+            ps = con.prepareStatement(sql);
+            ps.setString(1, "%" + keyword + "%");
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                User user = new User();
+                user.setUserId(rs.getInt("USER_ID"));
+                user.setUsername(rs.getString("USERNAME"));
+                user.setEmail(rs.getString("EMAIL"));
+                user.setBio(rs.getString("BIO"));
+                user.setLocation(rs.getString("LOCATION"));
+                user.setWebsite(rs.getString("WEBSITE"));
+
+                list.add(user);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return list;
+    }
+
 }

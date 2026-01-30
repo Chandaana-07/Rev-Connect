@@ -17,8 +17,7 @@ public class MainMenu {
             System.out.println("\n===== Welcome to RevConnect =====");
             System.out.println("1. Register");
             System.out.println("2. Login");
-            System.out.println("3. Forgot Password");
-            System.out.println("4. Exit");
+            System.out.println("3. Exit");
             System.out.print("Choose: ");
 
             int choice = sc.nextInt();
@@ -35,12 +34,8 @@ public class MainMenu {
                     break;
 
                 case 3:
-                    forgotPassword(sc);
+                    System.exit(0);
                     break;
-
-                case 4:
-                    System.out.println("Exit");
-                    return;
 
                 default:
                     System.out.println("Invalid choice");
@@ -133,8 +128,34 @@ public class MainMenu {
 
             UserMenu userMenu = new UserMenu(user);
             userMenu.showMenu();
-        } else {
-            System.out.println("Invalid credentials");
+        } 
+        else {
+            // ===================== WRONG PASSWORD FLOW =====================
+            System.out.println("Wrong email or password!");
+
+            while (true) {
+                System.out.println("1. Try Again");
+                System.out.println("2. Forgot Password");
+                System.out.println("3. Back to Main Menu");
+                System.out.print("Choose: ");
+
+                int opt = Integer.parseInt(sc.nextLine());
+
+                if (opt == 1) {
+                    login(sc);
+                    return;
+                } 
+                else if (opt == 2) {
+                    forgotPassword(sc);
+                    return;
+                } 
+                else if (opt == 3) {
+                    return;
+                } 
+                else {
+                    System.out.println("Invalid choice");
+                }
+            }
         }
     }
 

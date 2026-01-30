@@ -9,6 +9,12 @@ public class Post {
     private String username;
     private String content;
     private java.sql.Timestamp createdAt;
+    private String postType;       
+    private String ctaText;     
+    private int taggedProductId;
+    private java.sql.Timestamp scheduledTime;
+    private int reach;
+
 
     
     public int getPostId() {
@@ -42,6 +48,45 @@ public class Post {
     }
     public void setUsername(String username) {
         this.username = username;
+    }
+    public String getPostType() {
+        return postType;
+    }
+
+    public void setPostType(String postType) {
+        this.postType = postType;
+    }
+
+    public String getCtaText() {
+        return ctaText;
+    }
+
+    public void setCtaText(String ctaText) {
+        this.ctaText = ctaText;
+    }
+
+    public int getTaggedProductId() {
+        return taggedProductId;
+    }
+
+    public void setTaggedProductId(int taggedProductId) {
+        this.taggedProductId = taggedProductId;
+    }
+
+    public java.sql.Timestamp getScheduledTime() {
+        return scheduledTime;
+    }
+
+    public void setScheduledTime(java.sql.Timestamp scheduledTime) {
+        this.scheduledTime = scheduledTime;
+    }
+
+    public int getReach() {
+        return reach;
+    }
+
+    public void setReach(int reach) {
+        this.reach = reach;
     }
 
 }

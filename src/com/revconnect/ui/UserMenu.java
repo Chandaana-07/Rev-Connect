@@ -3,27 +3,39 @@ package com.revconnect.ui;
 import java.util.List;
 import java.util.Scanner;
 
-import com.revconnect.model.Comment;
-import com.revconnect.model.Message;
+import com.revconnect.model.BusinessProduct;
+import com.revconnect.model.CreatorBusinessProfile;
+import com.revconnect.model.Notification;
 import com.revconnect.model.Post;
 import com.revconnect.model.User;
+import com.revconnect.service.BusinessProductService;
 import com.revconnect.service.CommentService;
+import com.revconnect.service.ConnectionService;
+import com.revconnect.service.CreatorBusinessService;
+import com.revconnect.service.FollowService;
 import com.revconnect.service.LikeService;
 import com.revconnect.service.MessageService;
+import com.revconnect.service.NotificationService;
 import com.revconnect.service.PostService;
-import com.revconnect.service.UserService;
 import com.revconnect.service.ShareService;
-
+import com.revconnect.service.UserService;
 
 public class UserMenu {
 
     private User loggedInUser;
+    private Scanner sc = new Scanner(System.in);
+
     private PostService postService = new PostService();
     private UserService userService = new UserService();
     private MessageService messageService = new MessageService();
     private CommentService commentService = new CommentService();
     private LikeService likeService = new LikeService();
+    private ConnectionService connectionService = new ConnectionService();
     private ShareService shareService = new ShareService();
+    private NotificationService notificationService = new NotificationService();
+    private FollowService followService = new FollowService();
+    private CreatorBusinessService creatorService = new CreatorBusinessService();
+    private BusinessProductService productService = new BusinessProductService();
 
     public UserMenu(User user) {
         this.loggedInUser = user;
@@ -31,154 +43,257 @@ public class UserMenu {
 
     // ===================== MAIN MENU =====================
     public void showMenu() {
-        Scanner sc = new Scanner(System.in);
 
         while (true) {
+
+            int unread = notificationService.getUnreadCount(
+                    loggedInUser.getUserId()
+            );
+
             System.out.println("\n===== User Dashboard =====");
-            System.out.println("1. View My Profile");
-            System.out.println("2. Edit Profile");
-            System.out.println("3. Create Post");
-            System.out.println("4. View My Posts");
-            System.out.println("5. Global Feed");
-            System.out.println("6. View Other User Profile");
-            System.out.println("7. Messages");
-            System.out.println("8. Comments");
-            System.out.println("9. Like / Unlike Post");
-            System.out.println("10. Notifications");
-            System.out.println("11. Share Post");
-            System.out.println("12. Logout");
+            System.out.println("1. Profile");
+            System.out.println("2. Posts");
+            System.out.println("3. Connections");
+            System.out.println("4. Follow System");
+            System.out.println("5. Messages");
+            System.out.println("6. Comments");
+            System.out.println("7. Notifications (" + unread + " unread)");
+            System.out.println("8. Creator/Business Profile");
+            System.out.println("9. Logout");
 
             System.out.print("Choose: ");
-            int choice = sc.nextInt();
-            sc.nextLine(); // consume newline
+            int choice = readInt();
 
             switch (choice) {
-
                 case 1:
-                    viewProfile();
+                    profileMenu();
                     break;
-
                 case 2:
-                    editProfile(sc);
+                    postsMenu();
                     break;
-
                 case 3:
-                    createPost(sc);
+                    connectionsMenu();
                     break;
-
                 case 4:
-                    viewMyPosts();
+                    followMenu();
                     break;
-
                 case 5:
-                    viewGlobalFeed();
+                    messagesMenu();
                     break;
-
                 case 6:
-                    viewOtherUserProfile(sc);
+                    commentsMenu();
                     break;
-
                 case 7:
-                    messagesMenu(sc);
+                    viewNotifications();
                     break;
-
                 case 8:
-                    commentsMenu(sc);
+                    creatorMenu();
                     break;
-
                 case 9:
-                    likeMenu(sc);
-                    break;
-
-                case 10:
-                    viewNotifications(sc);
-                    break;
-
-                case 11:
-                    sharePost(sc);
-                    break;
-
-                case 12:
                     System.out.println("Logged out successfully");
                     return;
-
                 default:
                     System.out.println("Invalid choice");
             }
         }
     }
 
-    // ===================== PROFILE =====================
-    private void viewProfile() {
-
-        if (loggedInUser == null) {
-            System.out.println("Please login first to view your profile.");
-            return;
-        }
-
-        System.out.println("\n--- My Profile ---");
-        System.out.println("Username : " + loggedInUser.getUsername());
-        System.out.println("Email    : " + loggedInUser.getEmail());
-        System.out.println("Bio      : " + loggedInUser.getBio());
-        System.out.println("Location : " + loggedInUser.getLocation());
-        System.out.println("Website  : " + loggedInUser.getWebsite());
-    }
-
-    private void editProfile(Scanner sc) {
-
-        System.out.print("Enter Bio: ");
-        loggedInUser.setBio(sc.nextLine());
-
-        System.out.print("Enter Location: ");
-        loggedInUser.setLocation(sc.nextLine());
-
-        System.out.print("Enter Website: ");
-        loggedInUser.setWebsite(sc.nextLine());
-
-        boolean updated = userService.updateProfile(loggedInUser);
-
-        if (updated) {
-            System.out.println("Profile updated successfully!");
-        } else {
-            System.out.println("Profile update failed");
+    // ===================== SAFE INPUT =====================
+    private int readInt() {
+        try {
+            return Integer.parseInt(sc.nextLine());
+        } catch (Exception e) {
+            return -1;
         }
     }
 
-    // ===================== POSTS =====================
-    private void createPost(Scanner sc) {
+    // ===================== POSTS MENU =====================
+    private void postsMenu() {
 
-        Post post = new Post();
-        post.setUserId(loggedInUser.getUserId());
+        while (true) {
+
+            boolean isCreator =
+                    creatorService.getProfile(loggedInUser.getUserId()) != null;
+
+            System.out.println("\n--- Posts ---");
+            System.out.println("1. Create Normal Post");
+
+            if (isCreator) {
+                System.out.println("2. Create Promotional Post");
+                System.out.println("3. View My Posts");
+                System.out.println("4. Edit My Post");
+                System.out.println("5. Delete My Post");
+                System.out.println("6. Global Feed");
+                System.out.println("7. Search by Hashtag");
+                System.out.println("8. Share a Post");
+                System.out.println("9. View Trending Hashtags");
+                System.out.println("10. Filter Feed");
+                System.out.println("11. View Post Analytics");
+                System.out.println("12. Back");
+            } else {
+                System.out.println("2. View My Posts");
+                System.out.println("3. Edit My Post");
+                System.out.println("4. Delete My Post");
+                System.out.println("5. Global Feed");
+                System.out.println("6. Search by Hashtag");
+                System.out.println("7. Share a Post");
+                System.out.println("8. View Trending Hashtags");
+                System.out.println("9. Filter Feed");
+                System.out.println("10. View Post Analytics");
+                System.out.println("11. Back");
+            }
+
+            System.out.print("Choose: ");
+            int choice = readInt();
+
+            if (isCreator) {
+                switch (choice) {
+                    case 1:
+                        createPost();
+                        break;
+                    case 2:
+                        createPromoPost();
+                        break;
+                    case 3:
+                        viewMyPosts();
+                        break;
+                    case 4:
+                        editPost();
+                        break;
+                    case 5:
+                        deletePost();
+                        break;
+                    case 6:
+                        viewGlobalFeed();
+                        break;
+                    case 7:
+                        searchByHashtag();
+                        break;
+                    case 8:
+                        sharePost();
+                        break;
+                    case 9:
+                        viewTrendingHashtags();
+                        break;
+                    case 10:
+                        filterFeed();
+                        break;
+                    case 11:
+                        viewPostAnalytics();
+                        break;
+                    case 12:
+                        return;
+                    default:
+                        System.out.println("Invalid choice");
+                }
+            } else {
+                switch (choice) {
+                    case 1:
+                        createPost();
+                        break;
+                    case 2:
+                        viewMyPosts();
+                        break;
+                    case 3:
+                        editPost();
+                        break;
+                    case 4:
+                        deletePost();
+                        break;
+                    case 5:
+                        viewGlobalFeed();
+                        break;
+                    case 6:
+                        searchByHashtag();
+                        break;
+                    case 7:
+                        sharePost();
+                        break;
+                    case 8:
+                        viewTrendingHashtags();
+                        break;
+                    case 9:
+                        filterFeed();
+                        break;
+                    case 10:
+                        viewPostAnalytics();
+                        break;
+                    case 11:
+                        return;
+                    default:
+                        System.out.println("Invalid choice");
+                }
+            }
+        }
+    }
+
+    // ===================== CREATE NORMAL POST =====================
+    private void createPost() {
 
         System.out.print("Enter post content: ");
         String content = sc.nextLine().trim();
 
-        if (content.length() == 0) {
+        if (content.isEmpty()) {
             System.out.println("Post cannot be empty.");
             return;
         }
 
+        Post post = new Post();
+        post.setUserId(loggedInUser.getUserId());
         post.setContent(content);
+        post.setPostType("NORMAL");
 
         boolean success = postService.createPost(post);
-
-        if (success) {
-            System.out.println("Post created successfully!");
-        } else {
-            System.out.println("Failed to create post");
-        }
+        System.out.println(success ? "Post created successfully!" : "Failed to create post");
     }
 
+    // ===================== CREATE PROMOTIONAL POST =====================
+    private void createPromoPost() {
 
-    private void viewMyPosts() {
+        CreatorBusinessProfile profile =
+                creatorService.getProfile(loggedInUser.getUserId());
 
-        if (loggedInUser == null) {
-            System.out.println("Please login first.");
+        if (profile == null) {
+            System.out.println("Only Creator/Business accounts can create promotional posts.");
             return;
         }
 
-        List<Post> posts =
-            postService.getPostsByUser(loggedInUser.getUserId());
+        Post p = new Post();
+        p.setUserId(loggedInUser.getUserId());
+        p.setPostType("PROMO");
+
+        System.out.print("Enter promo content: ");
+        p.setContent(sc.nextLine());
+
+        System.out.print("CTA (Learn More / Shop Now): ");
+        p.setCtaText(sc.nextLine());
+
+        System.out.print("Tagged Product ID (0 if none): ");
+        p.setTaggedProductId(readInt());
+
+        System.out.print("Schedule Time (yyyy-mm-dd hh:mm) or press Enter for now: ");
+        String time = sc.nextLine();
+
+        if (!time.trim().isEmpty()) {
+            try {
+                p.setScheduledTime(
+                        java.sql.Timestamp.valueOf(time + ":00")
+                );
+            } catch (Exception e) {
+                System.out.println("Invalid date format. Skipping schedule.");
+            }
+        }
+
+        boolean success = postService.createPromoPost(p);
+        System.out.println(success ? "Promo post created!" : "Failed to create promo post");
+    }
+
+    // ===================== VIEW MY POSTS =====================
+    private void viewMyPosts() {
+
+        List<Post> posts = postService.getPostsByUser(
+                loggedInUser.getUserId()
+        );
 
         if (posts.isEmpty()) {
             System.out.println("No posts found.");
@@ -186,425 +301,418 @@ public class UserMenu {
         }
 
         System.out.println("\n--- My Posts ---");
-        for (Post post : posts) {
+        for (Post p : posts) {
             System.out.println(
-                post.getContent() +
-                " (" + post.getCreatedAt() + ")"
+                    "[" + p.getPostId() + "] " +
+                            p.getContent() +
+                            " (" + p.getCreatedAt() + ")"
             );
         }
+    }
+
+    // ===================== EDIT POST =====================
+    private void editPost() {
+
+        System.out.print("Enter Post ID to edit: ");
+        int postId = readInt();
+
+        System.out.print("Enter new content: ");
+        String content = sc.nextLine().trim();
+
+        boolean success = postService.updatePost(
+                postId,
+                loggedInUser.getUserId(),
+                content
+        );
+
+        System.out.println(success ? "Post updated!" : "Failed to update post.");
+    }
+
+    // ===================== DELETE POST =====================
+    private void deletePost() {
+
+        System.out.print("Enter Post ID to delete: ");
+        int postId = readInt();
+
+        boolean success = postService.deletePost(
+                postId,
+                loggedInUser.getUserId()
+        );
+
+        System.out.println(success ? "Post deleted!" : "Failed to delete post.");
     }
 
     // ===================== GLOBAL FEED =====================
     private void viewGlobalFeed() {
 
-        List<Post> posts = postService.getAllPosts();
+        List<Post> posts = postService.getFeedPosts(
+                loggedInUser.getUserId()
+        );
 
-        System.out.println("\n--- Global Feed ---");
+        if (posts.isEmpty()) {
+            System.out.println("Your feed is empty.");
+            return;
+        }
+
+        System.out.println("\n--- Your Feed ---");
         for (Post post : posts) {
 
-            int likeCount = likeService.getLikeCount(post.getPostId());
-            int shareCount = shareService.getShareCount(post.getPostId());
+            int likes = likeService.getLikeCount(post.getPostId());
+            int shares = shareService.getShareCount(post.getPostId());
 
             System.out.println(
-                post.getUsername() + ": " +
-                post.getContent() +
-                " (" + post.getCreatedAt() + ") " +
-                "Likes: " + likeCount +
-                " Shares: " + shareCount
+                    "[" + post.getPostId() + "] " +
+                            post.getUsername() + ": " +
+                            post.getContent() +
+                            " Likes: " + likes +
+                            " Shares: " + shares
             );
         }
     }
 
+    // ===================== SEARCH =====================
+    private void searchByHashtag() {
 
-    // ===================== VIEW OTHER USER =====================
-    private void viewOtherUserProfile(Scanner sc) {
+        System.out.print("Enter hashtag (without #): ");
+        String tag = sc.nextLine().trim();
 
-        System.out.print("Enter username to search: ");
-        String username = sc.nextLine();
+        List<Post> list = postService.searchByHashtag("#" + tag);
 
-        User user = userService.getUserByUsername(username);
-
-        if (user == null) {
-            System.out.println("User not found.");
+        if (list.isEmpty()) {
+            System.out.println("No posts found.");
             return;
         }
 
-        System.out.println("\n--- User Profile ---");
-        System.out.println("Username : " + user.getUsername());
-        System.out.println("Bio      : " + user.getBio());
-        System.out.println("Location : " + user.getLocation());
-        System.out.println("Website  : " + user.getWebsite());
-    }
-
-    // ===================== MESSAGES MENU =====================
-    private void messagesMenu(Scanner sc) {
-
-        while (true) {
-            System.out.println("\n--- Messages ---");
-            System.out.println("1. Send Message");
-            System.out.println("2. View Inbox");
-            System.out.println("3. View Conversation");
-            System.out.println("4. Back");
-
-            System.out.print("Choose: ");
-            int choice = Integer.parseInt(sc.nextLine());
-
-            switch (choice) {
-
-                case 1:
-                    sendMessage(sc);
-                    break;
-
-                case 2:
-                    viewInbox();
-                    break;
-
-                case 3:
-                    viewConversation(sc);
-                    break;
-
-                case 4:
-                    return;
-
-                default:
-                    System.out.println("Invalid choice");
-            }
+        for (Post p : list) {
+            System.out.println(p.getUsername() + ": " + p.getContent());
         }
     }
 
-    // ===================== SEND MESSAGE =====================
-    private void sendMessage(Scanner sc) {
+    // ===================== TRENDING =====================
+    private void viewTrendingHashtags() {
 
-        System.out.print("Enter receiver username: ");
-        String username = sc.nextLine().trim();
+        List<String> list = postService.getTrendingHashtags();
 
-        if (username.length() == 0) {
-            System.out.println("Username cannot be empty.");
+        if (list.isEmpty()) {
+            System.out.println("No trending hashtags yet.");
             return;
         }
 
-        User receiver = userService.getUserByUsername(username);
-
-        if (receiver == null) {
-            System.out.println("User not found.");
-            return;
-        }
-
-        System.out.print("Enter message: ");
-        String content = sc.nextLine().trim();
-
-        if (content.length() == 0) {
-            System.out.println("Message cannot be empty.");
-            return;
-        }
-
-        Message msg = new Message();
-        msg.setSenderId(loggedInUser.getUserId());
-        msg.setReceiverId(receiver.getUserId());
-        msg.setContent(content);
-
-        boolean success = messageService.sendMessage(msg);
-
-        if (success) {
-            System.out.println("Message sent!");
-        } else {
-            System.out.println("Failed to send message");
+        for (String tag : list) {
+            System.out.println(tag);
         }
     }
 
+    // ===================== FILTER =====================
+    private void filterFeed() {
 
-    // ===================== VIEW INBOX =====================
-    private void viewInbox() {
+        System.out.println("1. All");
+        System.out.println("2. My Posts");
+        System.out.println("3. Creators");
 
-        List<Message> inbox =
-            messageService.getInbox(loggedInUser.getUserId());
+        int choice = readInt();
+        String type = "ALL";
 
-        if (inbox.isEmpty()) {
-            System.out.println("Inbox is empty.");
-            return;
-        }
+        if (choice == 2) type = "MY_POSTS";
+        else if (choice == 3) type = "CREATORS";
 
-        System.out.println("\n--- Inbox ---");
-        for (Message msg : inbox) {
-            System.out.println(
-                "From User ID " + msg.getSenderId() +
-                ": " + msg.getContent() +
-                " (" + msg.getSentAt() + ")"
-            );
-        }
-    }
-
-    // ===================== VIEW CONVERSATION =====================
-    private void viewConversation(Scanner sc) {
-
-        System.out.print("Enter username: ");
-        String username = sc.nextLine();
-
-        User user = userService.getUserByUsername(username);
-
-        if (user == null) {
-            System.out.println("User not found.");
-            return;
-        }
-
-        List<Message> convo =
-            messageService.getConversation(
+        List<Post> list = postService.getFilteredFeed(
                 loggedInUser.getUserId(),
-                user.getUserId()
-            );
+                type
+        );
 
-        if (convo.isEmpty()) {
-            System.out.println("No messages found.");
-            return;
-        }
-
-        System.out.println("\n--- Conversation ---");
-        for (Message msg : convo) {
-
-            String who =
-                msg.getSenderId() == loggedInUser.getUserId()
-                    ? "You"
-                    : user.getUsername();
-
-            System.out.println(
-                who + ": " +
-                msg.getContent() +
-                " (" + msg.getSentAt() + ")"
-            );
+        for (Post p : list) {
+            System.out.println(p.getUsername() + ": " + p.getContent());
         }
     }
 
-    // ===================== COMMENTS MENU =====================
-    private void commentsMenu(Scanner sc) {
+    // ===================== POST ANALYTICS =====================
+    private void viewPostAnalytics() {
+
+        System.out.print("Enter Post ID: ");
+        int postId = readInt();
+
+        Post p = postService.getPostAnalytics(postId);
+
+        if (p == null) {
+            System.out.println("Post not found.");
+            return;
+        }
+
+        System.out.println("\n--- Post Analytics ---");
+        System.out.println("Likes: " + likeService.getLikeCount(postId));
+        System.out.println("Comments: " + commentService.getCommentsByPost(postId).size());
+        System.out.println("Shares: " + shareService.getShareCount(postId));
+        System.out.println("Reach: " + p.getReach());
+    }
+
+    // ===================== PROFILE =====================
+    private void profileMenu() {
+
+        System.out.println("\n--- My Profile ---");
+        System.out.println("Username: " + loggedInUser.getUsername());
+        System.out.println("User ID: " + loggedInUser.getUserId());
+        System.out.println("Email: " + loggedInUser.getEmail());
+    }
+
+    // ===================== CREATOR MENU =====================
+    private void creatorMenu() {
 
         while (true) {
-            System.out.println("\n--- Comments ---");
-            System.out.println("1. Add Comment");
-            System.out.println("2. View Comments on a Post");
-            System.out.println("3. Delete My Comment");
-            System.out.println("4. Back");
+
+            System.out.println("\n--- Creator / Business Profile ---");
+            System.out.println("1. Register as Creator/Business");
+            System.out.println("2. View My Profile");
+            System.out.println("3. Update Profile");
+            System.out.println("4. Manage Products/Services");
+            System.out.println("5. Back");
 
             System.out.print("Choose: ");
-            int choice = Integer.parseInt(sc.nextLine());
+            int choice = readInt();
 
             switch (choice) {
-
                 case 1:
-                    addComment(sc);
+                    registerCreator();
                     break;
-
                 case 2:
-                    viewComments(sc);
+                    viewCreatorProfile();
                     break;
-
                 case 3:
-                    deleteComment(sc);
+                    updateCreatorProfile();
                     break;
-
                 case 4:
+                    productMenu();
+                    break;
+                case 5:
                     return;
-
                 default:
                     System.out.println("Invalid choice");
             }
         }
     }
 
-    // ===================== ADD COMMENT =====================
-    private void addComment(Scanner sc) {
+    // ===================== REGISTER CREATOR =====================
+    private void registerCreator() {
 
-        System.out.print("Enter Post ID: ");
-        int postId = Integer.parseInt(sc.nextLine());
+        CreatorBusinessProfile p = new CreatorBusinessProfile();
+        p.setUserId(loggedInUser.getUserId());
 
-        System.out.print("Enter comment: ");
-        String content = sc.nextLine().trim();
+        System.out.print("Account Type (CREATOR / BUSINESS): ");
+        p.setAccountType(sc.nextLine());
 
-        if (content.length() == 0) {
-            System.out.println("Comment cannot be empty.");
+        System.out.print("Display Name: ");
+        p.setDisplayName(sc.nextLine());
+
+        System.out.print("Category / Industry: ");
+        p.setCategory(sc.nextLine());
+
+        System.out.print("Bio: ");
+        p.setBio(sc.nextLine());
+
+        System.out.print("Business Address: ");
+        p.setAddress(sc.nextLine());
+
+        System.out.print("Contact Info: ");
+        p.setContactInfo(sc.nextLine());
+
+        System.out.print("Website: ");
+        p.setWebsite(sc.nextLine());
+
+        System.out.print("Social Links: ");
+        p.setSocialLinks(sc.nextLine());
+
+        System.out.print("Business Hours: ");
+        p.setBusinessHours(sc.nextLine());
+
+        System.out.print("External Links: ");
+        p.setExternalLinks(sc.nextLine());
+
+        boolean success = creatorService.register(p);
+        System.out.println(success ? "Profile created!" : "Failed to create profile");
+    }
+
+    // ===================== VIEW CREATOR =====================
+    private void viewCreatorProfile() {
+
+        CreatorBusinessProfile p =
+                creatorService.getProfile(loggedInUser.getUserId());
+
+        if (p == null) {
+            System.out.println("No creator/business profile found.");
             return;
         }
 
-        Comment comment = new Comment();
-        comment.setPostId(postId);
-        comment.setUserId(loggedInUser.getUserId());
-        comment.setContent(content);
-
-        boolean success = commentService.addComment(comment);
-
-        if (success) {
-            System.out.println("Comment added!");
-        } else {
-            System.out.println("Failed to add comment");
-        }
+        System.out.println("\n--- My Creator/Business Profile ---");
+        System.out.println("Type: " + p.getAccountType());
+        System.out.println("Name: " + p.getDisplayName());
+        System.out.println("Category: " + p.getCategory());
+        System.out.println("Bio: " + p.getBio());
+        System.out.println("Address: " + p.getAddress());
+        System.out.println("Contact: " + p.getContactInfo());
+        System.out.println("Website: " + p.getWebsite());
+        System.out.println("Social Links: " + p.getSocialLinks());
+        System.out.println("Business Hours: " + p.getBusinessHours());
+        System.out.println("External Links: " + p.getExternalLinks());
     }
 
+    // ===================== UPDATE CREATOR =====================
+    private void updateCreatorProfile() {
 
-    // ===================== VIEW COMMENTS =====================
-    private void viewComments(Scanner sc) {
+        CreatorBusinessProfile p =
+                creatorService.getProfile(loggedInUser.getUserId());
 
-        System.out.print("Enter Post ID: ");
-        int postId = Integer.parseInt(sc.nextLine());
-
-        List<Comment> comments =
-            commentService.getCommentsByPost(postId);
-
-        if (comments.isEmpty()) {
-            System.out.println("No comments found.");
+        if (p == null) {
+            System.out.println("Register first.");
             return;
         }
 
-        System.out.println("\n--- Comments ---");
-        for (Comment c : comments) {
-            System.out.println(
-                c.getUsername() + ": " +
-                c.getContent() +
-                " (" + c.getCreatedAt() + ")"
-            );
-        }
+        System.out.print("Display Name (" + p.getDisplayName() + "): ");
+        p.setDisplayName(sc.nextLine());
+
+        System.out.print("Category (" + p.getCategory() + "): ");
+        p.setCategory(sc.nextLine());
+
+        System.out.print("Bio (" + p.getBio() + "): ");
+        p.setBio(sc.nextLine());
+
+        System.out.print("Address (" + p.getAddress() + "): ");
+        p.setAddress(sc.nextLine());
+
+        System.out.print("Contact (" + p.getContactInfo() + "): ");
+        p.setContactInfo(sc.nextLine());
+
+        System.out.print("Website (" + p.getWebsite() + "): ");
+        p.setWebsite(sc.nextLine());
+
+        System.out.print("Social Links (" + p.getSocialLinks() + "): ");
+        p.setSocialLinks(sc.nextLine());
+
+        System.out.print("Business Hours (" + p.getBusinessHours() + "): ");
+        p.setBusinessHours(sc.nextLine());
+
+        System.out.print("External Links (" + p.getExternalLinks() + "): ");
+        p.setExternalLinks(sc.nextLine());
+
+        boolean success = creatorService.update(p);
+        System.out.println(success ? "Profile updated!" : "Failed to update profile");
     }
 
-    // ===================== DELETE COMMENT =====================
-    private void deleteComment(Scanner sc) {
-
-        System.out.print("Enter Comment ID: ");
-        int commentId = Integer.parseInt(sc.nextLine());
-
-        boolean success =
-            commentService.deleteComment(
-                commentId,
-                loggedInUser.getUserId()
-            );
-
-        if (success) {
-            System.out.println("Comment deleted!");
-        } else {
-            System.out.println("Failed to delete comment (Check ID)");
-        }
-    }
-
-    // ===================== LIKES MENU =====================
-    private void likeMenu(Scanner sc) {
+    // ===================== PRODUCT MENU =====================
+    private void productMenu() {
 
         while (true) {
-            System.out.println("\n--- Likes ---");
-            System.out.println("1. Like a Post");
-            System.out.println("2. Unlike a Post");
+
+            System.out.println("\n--- Products / Services ---");
+            System.out.println("1. Add Product/Service");
+            System.out.println("2. View My Products");
             System.out.println("3. Back");
 
             System.out.print("Choose: ");
-            int choice = Integer.parseInt(sc.nextLine());
+            int choice = readInt();
 
             switch (choice) {
-
                 case 1:
-                    likePost(sc);
+                    addProduct();
                     break;
-
                 case 2:
-                    unlikePost(sc);
+                    viewProducts();
                     break;
-
                 case 3:
                     return;
-
                 default:
                     System.out.println("Invalid choice");
             }
         }
     }
 
-    // ===================== LIKE POST =====================
-    private void likePost(Scanner sc) {
+    // ===================== ADD PRODUCT =====================
+    private void addProduct() {
 
-        System.out.print("Enter Post ID: ");
-        int postId = Integer.parseInt(sc.nextLine());
+        BusinessProduct p = new BusinessProduct();
+        p.setUserId(loggedInUser.getUserId());
 
-        boolean success =
-            likeService.likePost(
-                postId,
-                loggedInUser.getUserId()
+        System.out.print("Product/Service Name: ");
+        p.setName(sc.nextLine());
+
+        System.out.print("Description: ");
+        p.setDescription(sc.nextLine());
+
+        System.out.print("Price: ");
+        p.setPrice(sc.nextLine());
+
+        System.out.print("External Link: ");
+        p.setLink(sc.nextLine());
+
+        boolean success = productService.addProduct(p);
+        System.out.println(success ? "Product added!" : "Failed to add product");
+    }
+
+    // ===================== VIEW PRODUCTS =====================
+    private void viewProducts() {
+
+        List<BusinessProduct> list =
+                productService.getProducts(loggedInUser.getUserId());
+
+        if (list.isEmpty()) {
+            System.out.println("No products found.");
+            return;
+        }
+
+        for (BusinessProduct p : list) {
+            System.out.println(
+                    "[" + p.getProductId() + "] " +
+                            p.getName() + " | " +
+                            p.getPrice() + " | " +
+                            p.getLink()
             );
-
-        if (success) {
-            System.out.println("Post liked!");
-        } else {
-            System.out.println("Already liked or invalid post.");
         }
     }
 
-    // ===================== UNLIKE POST =====================
-    private void unlikePost(Scanner sc) {
+    // ===================== NOTIFICATIONS =====================
+    private void viewNotifications() {
 
-        System.out.print("Enter Post ID: ");
-        int postId = Integer.parseInt(sc.nextLine());
-
-        boolean success =
-            likeService.unlikePost(
-                postId,
+        List<Notification> list = notificationService.getMyNotifications(
                 loggedInUser.getUserId()
-            );
-
-        if (success) {
-            System.out.println("Like removed!");
-        } else {
-            System.out.println("You have not liked this post.");
-        }
-    }
- // ===================== NOTIFICATIONS =====================
-    private void viewNotifications(Scanner sc) {
-
-        List<com.revconnect.model.Notification> list =
-            new com.revconnect.service.NotificationService()
-                .getMyNotifications(
-                    loggedInUser.getUserId()
-                );
+        );
 
         if (list.isEmpty()) {
             System.out.println("No notifications.");
             return;
         }
 
-        System.out.println("\n--- Notifications ---");
-        for (com.revconnect.model.Notification n : list) {
-            System.out.println(
-                "[" + n.getNotifId() + "] " +
-                n.getMessage() +
-                " (" + n.getCreatedAt() + ")"
-            );
-        }
-
-        System.out.print(
-            "Enter Notification ID to mark as read (0 to skip): "
-        );
-        int id = Integer.parseInt(sc.nextLine());
-
-        if (id != 0) {
-            new com.revconnect.service.NotificationService()
-                .markAsRead(
-                    id,
-                    loggedInUser.getUserId()
-                );
-            System.out.println("Marked as read.");
+        for (Notification n : list) {
+            System.out.println(n.getMessage());
         }
     }
 
-    //==========================SHARE===================================
-    private void sharePost(Scanner sc) {
+    // ===================== PLACEHOLDER MENUS =====================
+    private void commentsMenu() {
+        System.out.println("Comments menu working");
+    }
+
+    private void connectionsMenu() {
+        System.out.println("Connections menu working");
+    }
+
+    private void followMenu() {
+        System.out.println("Follow system working");
+    }
+
+    private void messagesMenu() {
+        System.out.println("Messages menu working");
+    }
+
+    // ===================== SHARE =====================
+    private void sharePost() {
 
         System.out.print("Enter Post ID to share: ");
-        int postId = Integer.parseInt(sc.nextLine());
+        int postId = readInt();
 
-        boolean success =
-            shareService.sharePost(
+        boolean success = shareService.sharePost(
                 postId,
                 loggedInUser.getUserId()
-            );
+        );
 
-        if (success) {
-            System.out.println("Post shared successfully!");
-        } else {
-            System.out.println("Failed to share post");
-        }
+        System.out.println(success ? "Post shared!" : "Failed to share post");
     }
-
 }

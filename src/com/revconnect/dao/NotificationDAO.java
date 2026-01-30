@@ -5,9 +5,15 @@ import com.revconnect.model.Notification;
 
 public interface NotificationDAO {
 
-    boolean addNotification(int userId, String message);
+    // Create a new notification
+    boolean createNotification(Notification n);
 
-    List<Notification> getNotifications(int userId);
+    // Get all notifications for a user
+    List<Notification> getMyNotifications(int userId);
 
+    // Mark notification as read
     boolean markAsRead(int notifId, int userId);
+
+    // Get unread count
+    int getUnreadCount(int userId);
 }

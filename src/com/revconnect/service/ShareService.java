@@ -5,17 +5,17 @@ import com.revconnect.dao.impl.ShareDAOImpl;
 
 public class ShareService {
 
-    private ShareDAO shareDAO;
+    private ShareDAO dao;
 
     public ShareService() {
-        shareDAO = new ShareDAOImpl();
+        dao = new ShareDAOImpl();
     }
 
     public boolean sharePost(int postId, int userId) {
-        return shareDAO.sharePost(postId, userId);
+        return dao.sharePost(postId, userId);
     }
 
     public int getShareCount(int postId) {
-        return shareDAO.getShareCount(postId);
+        return dao.getShareCount(postId);
     }
 }

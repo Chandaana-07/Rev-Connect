@@ -9,37 +9,51 @@ import com.revconnect.db.DBConnection;
 
 public class ShareDAOImpl implements ShareDAO {
 
-    @Override
-    public boolean sharePost(int postId, int userId) {
+    // ---------------- SHARE POST ----------------
+	@Override
+	public boolean sharePost(int postId, int userId) {
 
-        Connection con = null;
-        PreparedStatement ps = null;
+	    Connection con = null;
+	    PreparedStatement ps = null;
 
-        try {
-            con = DBConnection.getConnection();
+	    try {
+	        con = DBConnection.getConnection();
+	        con.setAutoCommit(false);
 
-            String sql = "INSERT INTO SHARES (POST_ID, USER_ID) VALUES (?, ?)";
+	        String sql =
+	            "INSERT INTO SHARES (POST_ID, USER_ID) " +
+	            "VALUES (?, ?)";
 
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, postId);
-            ps.setInt(2, userId);
+	        ps = con.prepareStatement(sql);
+	        ps.setInt(1, postId);
+	        ps.setInt(2, userId);
 
-            return ps.executeUpdate() > 0;
+	        int rows = ps.executeUpdate();
+	        con.commit();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+	        System.out.println("DEBUG: Inserted rows into SHARES = " + rows);
+	        return rows == 1;
 
-        return false;
-    }
+	    } catch (Exception e) {
+	        try {
+	            if (con != null) con.rollback();
+	        } catch (Exception ex) {
+	            ex.printStackTrace();
+	        }
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (ps != null) ps.close();
+	            if (con != null) con.close();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
 
+	    return false;
+	}
+
+    // ---------------- GET SHARE COUNT ----------------
     @Override
     public int getShareCount(int postId) {
 
@@ -50,7 +64,9 @@ public class ShareDAOImpl implements ShareDAO {
         try {
             con = DBConnection.getConnection();
 
-            String sql = "SELECT COUNT(*) FROM SHARES WHERE POST_ID = ?";
+            String sql =
+                "SELECT COUNT(*) FROM SHARES " +
+                "WHERE POST_ID = ?";
 
             ps = con.prepareStatement(sql);
             ps.setInt(1, postId);
