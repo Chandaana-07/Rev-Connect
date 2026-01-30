@@ -1,74 +1,140 @@
 package com.revconnect.service;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import com.revconnect.dao.ConnectionDAO;
-import com.revconnect.dao.impl.ConnectionDAOImpl;
 import com.revconnect.model.UserConnection;
-import com.revconnect.service.NotificationService;
-
 
 public class ConnectionService {
 
-    private ConnectionDAO dao;
-    private NotificationService notificationService = new NotificationService();
+    private static List<UserConnection> connections = new ArrayList<UserConnection>();
 
-    public ConnectionService() {
-        dao = new ConnectionDAOImpl();
-        notificationService = new NotificationService(); // ADD THIS
+    // ========== CONNECTIONS ==========
+
+    // 1. Send Request
+    public void sendRequest(int fromUser, int toUser) {
+        connections.add(new UserConnection(fromUser, toUser, "PENDING"));
+        System.out.println("Connection request sent.");
     }
 
-    // ---------------- SEND REQUEST ----------------
-    public boolean sendRequest(int senderId, int receiverId) {
-
-        boolean success = dao.sendRequest(senderId, receiverId);
-
-        if (success) {
-            notificationService.notifyUser(
-                receiverId,
-                "You received a new connection request"
-            );
+    // 2. View Pending Requests
+    public List<UserConnection> getPending(int userId) {
+        List<UserConnection> list = new ArrayList<UserConnection>();
+        for (UserConnection c : connections) {
+            if (c.getReceiverId() == userId &&
+                c.getStatus().equals("PENDING")) {
+                list.add(c);
+            }
         }
-
-        return success;
+        return list;
     }
 
+    // 3. Accept Request
+    public void acceptRequest(int fromUser, int toUser) {
+        for (UserConnection c : connections) {
+            if (c.getSenderId() == fromUser &&
+                c.getReceiverId() == toUser &&
+                c.getStatus().equals("PENDING")) {
 
-    // ---------------- ACCEPT REQUEST ----------------
-    public boolean acceptRequest(int connectionId, int receiverId) {
-
-        int senderId = dao.getSenderIdByConnection(connectionId);
-
-        boolean success = dao.acceptRequest(connectionId, receiverId);
-
-        if (success) {
-            notificationService.notifyUser(
-                senderId,
-                "Your connection request was accepted"
-            );
+                c.setStatus("ACCEPTED");
+                System.out.println("Connection accepted.");
+                return;
+            }
         }
-
-        return success;
+        System.out.println("Request not found.");
     }
 
+    // 4. Reject Request
+    public void rejectRequest(int fromUser, int toUser) {
+        for (UserConnection c : connections) {
+            if (c.getSenderId() == fromUser &&
+                c.getReceiverId() == toUser &&
+                c.getStatus().equals("PENDING")) {
 
-    // ---------------- REJECT REQUEST ----------------
-    public boolean rejectRequest(int connectionId, int receiverId) {
-        return dao.rejectRequest(connectionId, receiverId);
+                connections.remove(c);
+                System.out.println("Request rejected.");
+                return;
+            }
+        }
+        System.out.println("Request not found.");
     }
 
-    // ---------------- VIEW PENDING ----------------
-    public List<UserConnection> getPendingRequests(int userId) {
-        return dao.getPendingRequests(userId);
-    }
-
-    // ---------------- VIEW CONNECTIONS ----------------
+    // 5. View My Connections
     public List<UserConnection> getConnections(int userId) {
-        return dao.getConnections(userId);
+        List<UserConnection> list = new ArrayList<UserConnection>();
+        for (UserConnection c : connections) {
+            if ((c.getSenderId() == userId || c.getReceiverId() == userId)
+                && c.getStatus().equals("ACCEPTED")) {
+
+                list.add(c);
+            }
+        }
+        return list;
     }
 
-    // ---------------- REMOVE CONNECTION ----------------
-    public boolean removeConnectionByUser(int myUserId, int otherUserId) {
-        return dao.removeConnectionByUser(myUserId, otherUserId);
+    // 6. Remove Connection
+    public void removeConnection(int user1, int user2) {
+        for (UserConnection c : connections) {
+            if ((c.getSenderId() == user1 && c.getReceiverId() == user2) ||
+                (c.getSenderId() == user2 && c.getReceiverId() == user1)) {
+
+                connections.remove(c);
+                System.out.println("Connection removed.");
+                return;
+            }
+        }
+        System.out.println("Connection not found.");
     }
+
+    // ========== FOLLOW SYSTEM ==========
+
+    // Follow User
+    public void follow(int fromUser, int toUser) {
+        connections.add(new UserConnection(fromUser, toUser, "FOLLOWING"));
+        System.out.println("Now following user.");
+    }
+
+    // Unfollow User
+    public void unfollow(int fromUser, int toUser) {
+        for (UserConnection c : connections) {
+            if (c.getSenderId() == fromUser &&
+                c.getReceiverId() == toUser &&
+                c.getStatus().equals("FOLLOWING")) {
+
+                connections.remove(c);
+                System.out.println("Unfollowed successfully.");
+                return;
+            }
+        }
+        System.out.println("You are not following this user.");
+    }
+
+    // View Followers
+    public List<UserConnection> getFollowers(int userId) {
+        List<UserConnection> list = new ArrayList<UserConnection>();
+        for (UserConnection c : connections) {
+            if (c.getReceiverId() == userId &&
+                c.getStatus().equals("FOLLOWING")) {
+
+                list.add(c);
+            }
+        }
+        return list;
+    }
+
+    // View Following
+    public List<UserConnection> getFollowing(int userId) {
+        List<UserConnection> list = new ArrayList<UserConnection>();
+        for (UserConnection c : connections) {
+            if (c.getSenderId() == userId &&
+                c.getStatus().equals("FOLLOWING")) {
+
+                list.add(c);
+            }
+        }
+        return list;
+    }
+    public int getFollowerCount(int userId) {
+        return getFollowers(userId).size();
+    }
+
 }

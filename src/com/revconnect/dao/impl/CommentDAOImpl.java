@@ -58,11 +58,13 @@ public class CommentDAOImpl implements CommentDAO {
             con = DBConnection.getConnection();
 
             String sql =
-                "SELECT c.COMMENT_ID, c.USER_ID, c.CONTENT, c.CREATED_AT, u.USERNAME " +
-                "FROM COMMENTS c " +
-                "JOIN USERS u ON c.USER_ID = u.USER_ID " +
-                "WHERE c.POST_ID = ? " +
-                "ORDER BY c.CREATED_AT";
+            	    "SELECT c.COMMENT_ID, c.POST_ID, c.USER_ID, c.CONTENT, c.CREATED_AT, " +
+            	    "u.USERNAME AS USERNAME " +
+            	    "FROM COMMENTS c " +
+            	    "JOIN USERS u ON c.USER_ID = u.USER_ID " +
+            	    "WHERE c.POST_ID = ? " +
+            	    "ORDER BY c.CREATED_AT";
+
 
             ps = con.prepareStatement(sql);
             ps.setInt(1, postId);

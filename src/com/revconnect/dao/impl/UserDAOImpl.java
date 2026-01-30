@@ -349,5 +349,23 @@ public class UserDAOImpl implements UserDAO {
 
         return list;
     }
+    @Override
+    public int getUserIdByUsername(String username) {
+        String sql = "SELECT user_id FROM users WHERE username = ?";
+        try {
+            java.sql.Connection con = DBConnection.getConnection();
+            java.sql.PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, username);
+
+            java.sql.ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("user_id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1; // not found
+    }
+
 
 }

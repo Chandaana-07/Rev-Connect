@@ -1,14 +1,15 @@
 package com.revconnect.service;
 
 import com.revconnect.dao.UserDAO;
+
 import com.revconnect.dao.impl.UserDAOImpl;
 import com.revconnect.model.User;
 import java.util.List;
 
 
 public class UserService {
+	private UserDAO dao = new UserDAOImpl();
 
-    private UserDAO dao;
 
     public UserService() {
         dao = new UserDAOImpl();
@@ -53,6 +54,10 @@ public class UserService {
     }
     public List<User> searchUsers(String keyword) {
         return dao.searchUsers(keyword);
+    }
+
+    public int getUserIdByUsername(String username) {
+        return dao.getUserIdByUsername(username);
     }
 
 }

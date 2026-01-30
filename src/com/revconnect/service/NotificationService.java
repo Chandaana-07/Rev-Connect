@@ -1,44 +1,74 @@
 package com.revconnect.service;
 
-import java.util.List;
-
-import com.revconnect.dao.NotificationDAO;
-import com.revconnect.dao.impl.NotificationDAOImpl;
 import com.revconnect.model.Notification;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NotificationService {
 
-    private NotificationDAO dao;
+    private final String FILE = "notifications.dat";
 
-    public NotificationService() {
-        dao = new NotificationDAOImpl();
+    // Save new notification
+    public void addNotification(Notification n) {
+        List<Notification> list = getAll();
+        list.add(n);
+        saveAll(list);
     }
 
-    // Create notification
-    public boolean createNotification(Notification n) {
-        return dao.createNotification(n);
+    // Get all notifications
+    private List<Notification> getAll() {
+        try {
+            ObjectInputStream ois =
+                    new ObjectInputStream(new FileInputStream(FILE));
+            return (List<Notification>) ois.readObject();
+        } catch (Exception e) {
+            return new ArrayList<Notification>();
+        }
     }
 
-    // Helper to notify user
-    public void notifyUser(int userId, String message) {
-        Notification n = new Notification();
-        n.setUserId(userId);
-        n.setMessage(message);
-        dao.createNotification(n);
-    }
-
-    // View my notifications
-    public List<Notification> getMyNotifications(int userId) {
-        return dao.getMyNotifications(userId);
-    }
-
-    // Mark as read
-    public boolean markAsRead(int notifId, int userId) {
-        return dao.markAsRead(notifId, userId);
+    // Get user's notifications
+    public List<Notification> getUserNotifications(int userId) {
+        List<Notification> result = new ArrayList<Notification>();
+        for (Notification n : getAll()) {
+            if (n.getUserId() == userId) {
+                result.add(n);
+            }
+        }
+        return result;
     }
 
     // Unread count
     public int getUnreadCount(int userId) {
-        return dao.getUnreadCount(userId);
+        int count = 0;
+        for (Notification n : getUserNotifications(userId)) {
+            if (!n.isRead()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    // Mark all as read
+    public void markAllRead(int userId) {
+        List<Notification> list = getAll();
+        for (Notification n : list) {
+            if (n.getUserId() == userId) {
+                n.markRead();
+            }
+        }
+        saveAll(list);
+    }
+
+    private void saveAll(List<Notification> list) {
+        try {
+            ObjectOutputStream oos =
+                    new ObjectOutputStream(new FileOutputStream(FILE));
+            oos.writeObject(list);
+            oos.close();
+        } catch (Exception e) {
+            System.out.println("Error saving notifications");
+        }
     }
 }

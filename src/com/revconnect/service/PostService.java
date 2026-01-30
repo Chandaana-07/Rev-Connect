@@ -99,5 +99,9 @@ public class PostService {
     public Post getPostAnalytics(int postId) {
         return dao.getPostById(postId);
     }
+    public void sharePost(int postId, String targetUser) {
+        System.out.println("Sharing post ID " + postId + " with user " + targetUser);
+
+    }
 
 }

@@ -24,5 +24,7 @@ public interface UserDAO {
     boolean resetPassword(String email, String newPassword);
     
     List<User> searchUsers(String keyword);
+    int getUserIdByUsername(String username);
+
 
 }

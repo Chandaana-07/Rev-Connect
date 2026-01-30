@@ -4,14 +4,25 @@ import java.sql.Timestamp;
 
 public class UserConnection {
 
+    // ===== Fields =====
     private int connectionId;
     private int senderId;
     private int receiverId;
-    private String status; // PENDING, ACCEPTED, REJECTED
+    private String status; // PENDING, ACCEPTED, FOLLOWING
     private Timestamp createdAt;
 
-    // -------- Getters & Setters --------
+    // ===== Default Constructor (REQUIRED by DAO) =====
+    public UserConnection() {
+    }
 
+    // ===== Parameterized Constructor =====
+    public UserConnection(int senderId, int receiverId, String status) {
+        this.senderId = senderId;
+        this.receiverId = receiverId;
+        this.status = status;
+    }
+
+    // ===== Getters & Setters =====
     public int getConnectionId() {
         return connectionId;
     }

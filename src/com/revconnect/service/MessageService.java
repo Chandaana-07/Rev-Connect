@@ -1,42 +1,60 @@
 package com.revconnect.service;
 
-import java.util.List;
-
-import com.revconnect.dao.MessageDAO;
-import com.revconnect.dao.impl.MessageDAOImpl;
 import com.revconnect.model.Message;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MessageService {
 
-    private MessageDAO dao;
-    private NotificationService notificationService;
+    private final String FILE = "messages.dat";
 
-    public MessageService() {
-        dao = new MessageDAOImpl();
-        notificationService = new NotificationService();
+    public void send(Message m) {
+        List<Message> list = getAll();
+        list.add(m);
+        saveAll(list);
     }
 
-    public boolean sendMessage(Message msg) {
-
-        boolean success = dao.sendMessage(msg);
-
-        if (success) {
-            if (msg.getReceiverId() != msg.getSenderId()) {
-                notificationService.notifyUser(
-                    msg.getReceiverId(),
-                    "New message received"
-                );
+    public List<Message> getConversation(int u1, int u2) {
+        List<Message> result = new ArrayList<Message>();
+        for (Message m : getAll()) {
+            if ((m.getFromId() == u1 && m.getToId() == u2) ||
+                (m.getFromId() == u2 && m.getToId() == u1)) {
+                result.add(m);
             }
         }
-
-        return success;
+        return result;
     }
 
-    public List<Message> getInbox(int userId) {
-        return dao.getInbox(userId);
+    public void markRead(int toId) {
+        List<Message> list = getAll();
+        for (Message m : list) {
+            if (m.getToId() == toId) {
+                m.markRead();
+            }
+        }
+        saveAll(list);
     }
 
-    public List<Message> getConversation(int user1, int user2) {
-        return dao.getConversation(user1, user2);
+    private List<Message> getAll() {
+        try {
+            ObjectInputStream ois =
+                    new ObjectInputStream(new FileInputStream(FILE));
+            return (List<Message>) ois.readObject();
+        } catch (Exception e) {
+            return new ArrayList<Message>();
+        }
+    }
+
+    private void saveAll(List<Message> list) {
+        try {
+            ObjectOutputStream oos =
+                    new ObjectOutputStream(new FileOutputStream(FILE));
+            oos.writeObject(list);
+            oos.close();
+        } catch (Exception e) {
+            System.out.println("Error saving messages");
+        }
     }
 }

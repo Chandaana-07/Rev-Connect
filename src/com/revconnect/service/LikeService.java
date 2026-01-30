@@ -5,25 +5,20 @@ import com.revconnect.dao.impl.LikeDAOImpl;
 
 public class LikeService {
 
-    private LikeDAO likeDAO;
+    private LikeDAO dao = new LikeDAOImpl();
 
-    public LikeService() {
-        likeDAO = new LikeDAOImpl();
-    }
-
-    public boolean likePost(int postId, int userId) {
-        return likeDAO.likePost(postId, userId);
-    }
-
-    public boolean unlikePost(int postId, int userId) {
-        return likeDAO.unlikePost(postId, userId);
+    public void likePost(int userId, int postId) {
+        boolean success = dao.likePost(userId, postId);
+        if (success) {
+            System.out.println("Post liked!");
+        }
     }
 
     public int getLikeCount(int postId) {
-        return likeDAO.getLikeCount(postId);
+        return dao.getLikeCount(postId);
     }
 
-    public boolean hasUserLiked(int postId, int userId) {
-        return likeDAO.hasUserLiked(postId, userId);
+    public boolean unlikePost(int userId, int postId) {
+        return dao.unlikePost(userId, postId);
     }
 }

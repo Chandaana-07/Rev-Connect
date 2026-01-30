@@ -10,6 +10,11 @@ public class User {
     private String bio;
     private String location;
     private String website;
+
+    private String securityQuestion;
+    private String securityAnswer;
+    private boolean isPrivate;
+
     
     
     // Getters & Setters
@@ -71,5 +76,40 @@ public class User {
 	public void setWebsite(String website) {
 		this.website = website;
 	}
-    
+	// ---- Security Methods ----
+	public boolean checkPassword(String pass) {
+	    return password != null && password.equals(pass);
+	}
+
+	public void setNewPassword(String newPass) {
+	    this.password = newPass;
+	}
+
+	// ---- Security Question ----
+	public String getSecurityQuestion() {
+	    return securityQuestion;
+	}
+
+	public void setSecurityQuestion(String securityQuestion) {
+	    this.securityQuestion = securityQuestion;
+	}
+
+	public boolean checkSecurityAnswer(String answer) {
+	    return securityAnswer != null &&
+	           securityAnswer.equalsIgnoreCase(answer);
+	}
+
+	public void setSecurityAnswer(String securityAnswer) {
+	    this.securityAnswer = securityAnswer;
+	}
+
+	// ---- Privacy ----
+	public boolean isPrivate() {
+	    return isPrivate;
+	}
+
+	public void togglePrivacy() {
+	    this.isPrivate = !this.isPrivate;
+	}
+
 }

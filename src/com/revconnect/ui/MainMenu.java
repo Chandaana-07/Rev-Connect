@@ -8,10 +8,10 @@ import com.revconnect.service.UserService;
 public class MainMenu {
 
     private UserService userService = new UserService();
+    private Scanner sc = new Scanner(System.in);
 
     // ===================== MAIN MENU =====================
     public void showMenu() {
-        Scanner sc = new Scanner(System.in);
 
         while (true) {
             System.out.println("\n===== Welcome to RevConnect =====");
@@ -20,20 +20,20 @@ public class MainMenu {
             System.out.println("3. Exit");
             System.out.print("Choose: ");
 
-            int choice = sc.nextInt();
-            sc.nextLine(); // consume newline
+            int choice = readInt();
 
             switch (choice) {
 
                 case 1:
-                    register(sc);
+                    register();
                     break;
 
                 case 2:
-                    login(sc);
+                    login();
                     break;
 
                 case 3:
+                    System.out.println("Thank you for using RevConnect!");
                     System.exit(0);
                     break;
 
@@ -43,8 +43,17 @@ public class MainMenu {
         }
     }
 
+    // ===================== SAFE INPUT =====================
+    private int readInt() {
+        try {
+            return Integer.parseInt(sc.nextLine());
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
     // ===================== REGISTER =====================
-    private void register(Scanner sc) {
+    private void register() {
 
         User user = new User();
 
@@ -102,7 +111,7 @@ public class MainMenu {
     }
 
     // ===================== LOGIN =====================
-    private void login(Scanner sc) {
+    private void login() {
 
         // -------- Email Validation --------
         String email;
@@ -126,10 +135,10 @@ public class MainMenu {
             System.out.println("Login Successful!");
             System.out.println("Welcome " + user.getUsername());
 
+           
             UserMenu userMenu = new UserMenu(user);
             userMenu.showMenu();
-        } 
-        else {
+        } else {
             // ===================== WRONG PASSWORD FLOW =====================
             System.out.println("Wrong email or password!");
 
@@ -139,20 +148,17 @@ public class MainMenu {
                 System.out.println("3. Back to Main Menu");
                 System.out.print("Choose: ");
 
-                int opt = Integer.parseInt(sc.nextLine());
+                int opt = readInt();
 
                 if (opt == 1) {
-                    login(sc);
+                    login();
                     return;
-                } 
-                else if (opt == 2) {
-                    forgotPassword(sc);
+                } else if (opt == 2) {
+                    forgotPassword();
                     return;
-                } 
-                else if (opt == 3) {
+                } else if (opt == 3) {
                     return;
-                } 
-                else {
+                } else {
                     System.out.println("Invalid choice");
                 }
             }
@@ -160,7 +166,7 @@ public class MainMenu {
     }
 
     // ===================== FORGOT PASSWORD =====================
-    private void forgotPassword(Scanner sc) {
+    private void forgotPassword() {
 
         String email;
         while (true) {
