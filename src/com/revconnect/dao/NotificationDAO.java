@@ -16,4 +16,7 @@ public interface NotificationDAO {
 
     // Get unread count
     int getUnreadCount(int userId);
+
+    
+
 }

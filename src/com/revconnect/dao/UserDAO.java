@@ -1,30 +1,28 @@
-package com.revconnect.dao;
-
-import com.revconnect.model.User;
+ package com.revconnect.dao;
+import java.sql.Connection;
 import java.util.List;
 
+import com.revconnect.model.User;
 
 public interface UserDAO {
 
-    boolean register(User user);
+    boolean register(Connection con, User user);
 
-    User login(String email, String password);
+    User login(Connection con, String email, String password);
 
-    boolean updateProfile(User user);
+    boolean updateProfile(Connection con, User user);
 
-    // Profile & Search
-    User getUserByUsername(String username);
-    User getUserByUsernameIgnoreCase(String username);
+    User getUserByUsername(Connection con, String username);
 
-    // Duplicate checks
-    User getUserByEmail(String email);
-    User getUserByUsernameExact(String username);
+    User getUserByUsernameIgnoreCase(Connection con, String username);
 
-    // Forgot password
-    boolean resetPassword(String email, String newPassword);
-    
-    List<User> searchUsers(String keyword);
-    int getUserIdByUsername(String username);
+    User getUserByEmail(Connection con, String email);
 
+    User getUserByUsernameExact(Connection con, String username);
 
+    boolean resetPassword(Connection con, String email, String newPassword);
+
+    List<User> searchUsers(Connection con, String keyword);
+
+    int getUserIdByUsername(Connection con, String username);
 }

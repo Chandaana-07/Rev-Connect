@@ -19,8 +19,8 @@ public class MessageService {
     public List<Message> getConversation(int u1, int u2) {
         List<Message> result = new ArrayList<Message>();
         for (Message m : getAll()) {
-            if ((m.getFromId() == u1 && m.getToId() == u2) ||
-                (m.getFromId() == u2 && m.getToId() == u1)) {
+            if ((m.getSenderId() == u1 && m.getReceiverId() == u2) ||
+                (m.getSenderId() == u2 && m.getReceiverId() == u1)) {
                 result.add(m);
             }
         }
@@ -30,8 +30,8 @@ public class MessageService {
     public void markRead(int toId) {
         List<Message> list = getAll();
         for (Message m : list) {
-            if (m.getToId() == toId) {
-                m.markRead();
+            if (m.getReceiverId() == toId) {
+                m.setRead(true);
             }
         }
         saveAll(list);

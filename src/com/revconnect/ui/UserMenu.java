@@ -20,15 +20,9 @@ import com.revconnect.service.PostService;
 import com.revconnect.service.ShareService;
 import com.revconnect.service.UserService;
 import com.revconnect.service.PinnedPostService;
-import com.revconnect.ui.BusinessMenu;
-import com.revconnect.ui.NotificationMenu;
-import com.revconnect.ui.ChatMenu;
-
-
 
 public class UserMenu {
-	 private Scanner scanner;
-	 
+
     private User loggedInUser;
     private Scanner sc = new Scanner(System.in);
 
@@ -44,21 +38,9 @@ public class UserMenu {
     private CreatorBusinessService creatorService = new CreatorBusinessService();
     private BusinessProductService productService = new BusinessProductService();
     private PinnedPostService pinnedPostService = new PinnedPostService();
-    BusinessMenu businessMenu = new BusinessMenu();
-    
+
     public UserMenu(User user) {
         this.loggedInUser = user;
-        this.postService = new PostService();
-        this.userService = new UserService();
-        this.messageService = new MessageService();
-        this.commentService = new CommentService();
-        this.likeService = new LikeService();
-        this.connectionService = new ConnectionService();
-        this.shareService = new ShareService();
-        this.notificationService = new NotificationService();
-        this.followService = new FollowService();
-        this.creatorService = new CreatorBusinessService();
-        this.productService = new BusinessProductService();
     }
 
     // ===================== MAIN MENU =====================
@@ -77,9 +59,7 @@ public class UserMenu {
             System.out.println("4. Follow System");
             System.out.println("5. Messages");
             System.out.println("6. Likes & Comments");
-            System.out.println("7. Notifications (" 
-            + notificationService.getUnreadCount(user.getUserId())
-            + " unread)");
+            System.out.println("7. Notifications (" + unread + " unread)");
             System.out.println("8. Creator/Business Profile");
             System.out.println("9. Logout");
 
@@ -100,17 +80,16 @@ public class UserMenu {
                     followMenu();
                     break;
                 case 5:
-                	 new ChatMenu(loggedInUser).showMenu();
+                    messagesMenu();
                     break;
                 case 6:
                     commentsMenu();
                     break;
                 case 7:
-                	new NotificationMenu(
-                			loggedInUser).showMenu();
+                    viewNotifications();
                     break;
                 case 8:
-                    businessMenu.showMenu();
+                    creatorMenu();
                     break;
                 case 9:
                     System.out.println("Logged out successfully");
@@ -171,80 +150,34 @@ public class UserMenu {
 
             if (isCreator) {
                 switch (choice) {
-                    case 1:
-                        createPost();
-                        break;
-                    case 2:
-                        createPromoPost();
-                        break;
-                    case 3:
-                        viewMyPosts();
-                        break;
-                    case 4:
-                        editPost();
-                        break;
-                    case 5:
-                        deletePost();
-                        break;
-                    case 6:
-                        viewGlobalFeed();
-                        break;
-                    case 7:
-                        searchByHashtag();
-                        break;
-                    case 8:
-                        sharePost();
-                        break;
-                    case 9:
-                        viewTrendingHashtags();
-                        break;
-                    case 10:
-                        filterFeed();
-                        break;
-                    case 11:
-                        viewPostAnalytics();
-                        break;
-                    case 12:
-                        return;
-                    default:
-                        System.out.println("Invalid choice");
+                    case 1: createPost(); break;
+                    case 2: createPromoPost(); break;
+                    case 3: viewMyPosts(); break;
+                    case 4: editPost(); break;
+                    case 5: deletePost(); break;
+                    case 6: viewGlobalFeed(); break;
+                    case 7: searchByHashtag(); break;
+                    case 8: sharePost(); break;
+                    case 9: viewTrendingHashtags(); break;
+                    case 10: filterFeed(); break;
+                    case 11: viewPostAnalytics(); break;
+                    case 12: return;
+                    default: System.out.println("Invalid choice");
                 }
             } else {
                 switch (choice) {
-                    case 1:
-                        createPost();
-                        break;
-                    case 2:
-                        viewMyPosts();
-                        break;
-                    case 3:
-                        editPost();
-                        break;
-                    case 4:
-                        deletePost();
-                        break;
-                    case 5:
-                        viewGlobalFeed();
-                        break;
-                    case 6:
-                        searchByHashtag();
-                        break;
-                    case 7:
-                        sharePost();
-                        break;
-                    case 8:
-                        viewTrendingHashtags();
-                        break;
-                    case 9:
-                        filterFeed();
-                        break;
-                    case 10:
-                        viewPostAnalytics();
-                        break;
-                    case 11:
-                        return;
-                    default:
-                        System.out.println("Invalid choice");
+                    case 1: createPost(); break;
+                    case 2: viewMyPosts(); break;
+                    case 3: editPost(); break;
+                    case 4: deletePost(); break;
+                    case 5: viewGlobalFeed(); break;
+                    case 6: searchByHashtag(); break;
+                    case 7: sharePost(); break;
+                    case 8: viewTrendingHashtags(); break;
+                    case 9: filterFeed(); break;
+                    case 10: viewPostAnalytics(); break;
+                    case 11: return;
+                    default: System.out.println("Invalid choice");
                 }
             }
         }
@@ -253,20 +186,24 @@ public class UserMenu {
     // ===================== CREATE NORMAL POST =====================
     private void createPost() {
 
+        System.out.print("Enter post name: ");
+        String postName = sc.nextLine().trim();
+
         System.out.print("Enter post content: ");
         String content = sc.nextLine().trim();
 
-        if (content.isEmpty()) {
-            System.out.println("Post cannot be empty.");
+        if (postName.isEmpty() || content.isEmpty()) {
+            System.out.println("Post name and content cannot be empty.");
             return;
         }
 
-        Post post = new Post();
-        post.setUserId(loggedInUser.getUserId());
-        post.setContent(content);
-        post.setPostType("NORMAL");
+        boolean success = postService.createPost(
+                loggedInUser.getUserId(),
+                postName,
+                content,
+                "NORMAL"
+        );
 
-        boolean success = postService.createPost(post);
         System.out.println(success ? "Post created successfully!" : "Failed to create post");
     }
 
@@ -281,33 +218,24 @@ public class UserMenu {
             return;
         }
 
-        Post p = new Post();
-        p.setUserId(loggedInUser.getUserId());
-        p.setPostType("PROMO");
+        System.out.print("Enter promo post name: ");
+        String postName = sc.nextLine().trim();
 
         System.out.print("Enter promo content: ");
-        p.setContent(sc.nextLine());
+        String content = sc.nextLine().trim();
 
-        System.out.print("CTA (Learn More / Shop Now): ");
-        p.setCtaText(sc.nextLine());
-
-        System.out.print("Tagged Product ID (0 if none): ");
-        p.setTaggedProductId(readInt());
-
-        System.out.print("Schedule Time (yyyy-mm-dd hh:mm) or press Enter for now: ");
-        String time = sc.nextLine();
-
-        if (!time.trim().isEmpty()) {
-            try {
-                p.setScheduledTime(
-                        java.sql.Timestamp.valueOf(time + ":00")
-                );
-            } catch (Exception e) {
-                System.out.println("Invalid date format. Skipping schedule.");
-            }
+        if (postName.isEmpty() || content.isEmpty()) {
+            System.out.println("Post name and content cannot be empty.");
+            return;
         }
 
-        boolean success = postService.createPromoPost(p);
+        boolean success = postService.createPost(
+                loggedInUser.getUserId(),
+                postName,
+                content,
+                "PROMO"
+        );
+
         System.out.println(success ? "Promo post created!" : "Failed to create promo post");
     }
 
@@ -327,6 +255,7 @@ public class UserMenu {
         for (Post p : posts) {
             System.out.println(
                     "[" + p.getPostId() + "] " +
+                            p.getUsername() + " : " +
                             p.getContent() +
                             " (" + p.getCreatedAt() + ")"
             );
@@ -336,16 +265,21 @@ public class UserMenu {
     // ===================== EDIT POST =====================
     private void editPost() {
 
-        System.out.print("Enter Post ID to edit: ");
-        int postId = readInt();
+        System.out.print("Enter Post Name to edit: ");
+        String postName = sc.nextLine().trim();
 
         System.out.print("Enter new content: ");
-        String content = sc.nextLine().trim();
+        String newContent = sc.nextLine().trim();
 
-        boolean success = postService.updatePost(
-                postId,
+        if (postName.isEmpty() || newContent.isEmpty()) {
+            System.out.println("Post name and new content cannot be empty.");
+            return;
+        }
+
+        boolean success = postService.updatePostByName(
                 loggedInUser.getUserId(),
-                content
+                postName,
+                newContent
         );
 
         System.out.println(success ? "Post updated!" : "Failed to update post.");
@@ -354,12 +288,17 @@ public class UserMenu {
     // ===================== DELETE POST =====================
     private void deletePost() {
 
-        System.out.print("Enter Post ID to delete: ");
-        int postId = readInt();
+        System.out.print("Enter Post Name to delete: ");
+        String postName = sc.nextLine().trim();
 
-        boolean success = postService.deletePost(
-                postId,
-                loggedInUser.getUserId()
+        if (postName.isEmpty()) {
+            System.out.println("Post name cannot be empty.");
+            return;
+        }
+
+        boolean success = postService.deletePostByName(
+                loggedInUser.getUserId(),
+                postName
         );
 
         System.out.println(success ? "Post deleted!" : "Failed to delete post.");
@@ -434,17 +373,20 @@ public class UserMenu {
         System.out.println("3. Creators");
 
         int choice = readInt();
-        String type = "ALL";
 
-        if (choice == 2) type = "MY_POSTS";
-        else if (choice == 3) type = "CREATORS";
-
-        List<Post> list = postService.getFilteredFeed(
-                loggedInUser.getUserId(),
-                type
+        List<Post> list = postService.getFeedPosts(
+                loggedInUser.getUserId()
         );
 
+        if (list.isEmpty()) {
+            System.out.println("No posts found.");
+            return;
+        }
+
         for (Post p : list) {
+            if (choice == 2 && p.getUserId() != loggedInUser.getUserId()) {
+                continue;
+            }
             System.out.println(p.getUsername() + ": " + p.getContent());
         }
     }
@@ -494,22 +436,12 @@ public class UserMenu {
             int choice = readInt();
 
             switch (choice) {
-                case 1:
-                    registerCreator();
-                    break;
-                case 2:
-                    viewCreatorProfile();
-                    break;
-                case 3:
-                    updateCreatorProfile();
-                    break;
-                case 4:
-                    productMenu();
-                    break;
-                case 5:
-                    return;
-                default:
-                    System.out.println("Invalid choice");
+                case 1: registerCreator(); break;
+                case 2: viewCreatorProfile(); break;
+                case 3: updateCreatorProfile(); break;
+                case 4: productMenu(); break;
+                case 5: return;
+                default: System.out.println("Invalid choice");
             }
         }
     }
@@ -620,7 +552,7 @@ public class UserMenu {
         System.out.println(success ? "Profile updated!" : "Failed to update profile");
     }
 
-    // ===================== PRODUCT MENU =====================
+    // ===================== PRODUCTS =====================
     private void productMenu() {
 
         while (true) {
@@ -634,21 +566,14 @@ public class UserMenu {
             int choice = readInt();
 
             switch (choice) {
-                case 1:
-                    addProduct();
-                    break;
-                case 2:
-                    viewProducts();
-                    break;
-                case 3:
-                    return;
-                default:
-                    System.out.println("Invalid choice");
+                case 1: addProduct(); break;
+                case 2: viewProducts(); break;
+                case 3: return;
+                default: System.out.println("Invalid choice");
             }
         }
     }
 
-    // ===================== ADD PRODUCT =====================
     private void addProduct() {
 
         BusinessProduct p = new BusinessProduct();
@@ -670,7 +595,6 @@ public class UserMenu {
         System.out.println(success ? "Product added!" : "Failed to add product");
     }
 
-    // ===================== VIEW PRODUCTS =====================
     private void viewProducts() {
 
         List<BusinessProduct> list =
@@ -694,7 +618,7 @@ public class UserMenu {
     // ===================== NOTIFICATIONS =====================
     private void viewNotifications() {
 
-        List<Notification> list = notificationService.getMyNotifications(
+        List<Notification> list = notificationService.getUserNotifications(
                 loggedInUser.getUserId()
         );
 
@@ -712,6 +636,7 @@ public class UserMenu {
     private void commentsMenu() {
 
         while (true) {
+
             System.out.println("\n--- Likes & Comments ---");
             System.out.println("1. Like a Post");
             System.out.println("2. Unlike a Post");
@@ -728,7 +653,6 @@ public class UserMenu {
 
             switch (choice) {
 
-                // LIKE
                 case 1:
                     System.out.print("Enter Post ID: ");
                     likeService.likePost(
@@ -737,19 +661,17 @@ public class UserMenu {
                     );
                     break;
 
-                // UNLIKE
                 case 2:
                     System.out.print("Enter Post ID: ");
                     boolean removed = likeService.unlikePost(
                             loggedInUser.getUserId(),
                             readInt()
                     );
-                    System.out.println(removed ? 
-                            "Like removed." : 
+                    System.out.println(removed ?
+                            "Like removed." :
                             "You have not liked this post.");
                     break;
 
-                // COMMENT
                 case 3:
                     System.out.print("Enter Post ID: ");
                     int postId = readInt();
@@ -766,7 +688,6 @@ public class UserMenu {
                     commentService.addComment(c);
                     break;
 
-                // VIEW COMMENTS
                 case 4:
                     System.out.print("Enter Post ID: ");
                     int pid = readInt();
@@ -780,14 +701,13 @@ public class UserMenu {
                         for (com.revconnect.model.Comment cm : list) {
                             System.out.println(
                                     "[" + cm.getCommentId() + "] " +
-                                    cm.getUsername() + ": " +
-                                    cm.getContent()
+                                            cm.getUsername() + ": " +
+                                            cm.getContent()
                             );
                         }
                     }
                     break;
 
-                // DELETE COMMENT
                 case 5:
                     System.out.print("Enter Comment ID to delete: ");
                     boolean success =
@@ -801,7 +721,6 @@ public class UserMenu {
                             "You can only delete your own comments.");
                     break;
 
-                // RESPOND
                 case 6:
                     System.out.print("Enter Comment ID: ");
                     int commentId = readInt();
@@ -812,7 +731,6 @@ public class UserMenu {
                     commentService.respondToComment(commentId, reply);
                     break;
 
-                // PIN
                 case 7:
                     System.out.print("Enter Post ID to pin: ");
                     pinnedPostService.pinPost(
@@ -821,7 +739,6 @@ public class UserMenu {
                     );
                     break;
 
-                // VIEW PINNED
                 case 8:
                     for (com.revconnect.model.PinnedPost p :
                             pinnedPostService.getPinnedPosts(
@@ -841,29 +758,11 @@ public class UserMenu {
         }
     }
 
-
-    private void messagesMenu() {
-        System.out.println("Messages menu working");
-    }
-
- 
- // ===================== SHARE =====================
-    public void sharePost() {
-        System.out.println("---- Share a Post ----");
-
-        // Debug safety check
-        if (postService == null) {
-            System.out.println("ERROR: PostService not initialized.");
-            return;
-        }
+    // ===================== SHARE =====================
+    private void sharePost() {
 
         System.out.print("Enter Post ID to share: ");
-        int postId = readInt();   // uses safe input
-
-        if (postId <= 0) {
-            System.out.println("Invalid Post ID.");
-            return;
-        }
+        int postId = readInt();
 
         System.out.print("Enter username to share with: ");
         String targetUser = sc.nextLine().trim();
@@ -874,156 +773,160 @@ public class UserMenu {
         }
 
         postService.sharePost(postId, targetUser);
-
         System.out.println("Post shared successfully with " + targetUser);
     }
 
-    
-//===================== CONNECTIONS MENU =====================
-private void connectionsMenu() {
+    // ===================== CONNECTIONS =====================
+    private void connectionsMenu() {
 
- while (true) {
-     System.out.println("\n--- Connections ---");
-     System.out.println("1. Send Connection Request");
-     System.out.println("2. View Pending Requests");
-     System.out.println("3. Accept Request");
-     System.out.println("4. Reject Request");
-     System.out.println("5. View My Connections");
-     System.out.println("6. Remove Connection");
-     System.out.println("7. Back");
+        while (true) {
 
-     System.out.print("Choose: ");
-     int choice = readInt();
-     int targetId;
+            System.out.println("\n--- Connections ---");
+            System.out.println("1. Send Connection Request");
+            System.out.println("2. View Pending Requests");
+            System.out.println("3. Accept Request");
+            System.out.println("4. Reject Request");
+            System.out.println("5. View My Connections");
+            System.out.println("6. Remove Connection");
+            System.out.println("7. Back");
 
-     switch (choice) {
+            System.out.print("Choose: ");
+            int choice = readInt();
+            int targetId;
 
-         case 1:
-        	 System.out.print("Enter Username to send request: ");
-        	 String targetUsername = sc.nextLine().trim();
+            switch (choice) {
 
-        	 targetId = userService.getUserIdByUsername(targetUsername);
+                case 1:
+                    System.out.print("Enter Username to send request: ");
+                    String targetUsername = sc.nextLine().trim();
 
-        	 if (targetId == -1) {
-        	     System.out.println("User not found.");
-        	     break;
-        	 }
+                    targetId = userService.getUserIdByUsername(targetUsername);
 
-        	 connectionService.sendRequest(
-        	         loggedInUser.getUserId(), targetId);
+                    if (targetId == -1) {
+                        System.out.println("User not found.");
+                        break;
+                    }
 
-             break;
+                    connectionService.sendRequest(
+                            loggedInUser.getUserId(), targetId);
+                    break;
 
-         case 2:
-             System.out.println("\n--- Pending Requests ---");
-             for (com.revconnect.model.UserConnection c :
-                     connectionService.getPending(loggedInUser.getUserId())) {
-                 System.out.println("From User ID: " + c.getSenderId());
-             }
-             break;
+                case 2:
+                    System.out.println("\n--- Pending Requests ---");
+                    for (com.revconnect.model.UserConnection c :
+                            connectionService.getPending(loggedInUser.getUserId())) {
+                        System.out.println("From User ID: " + c.getSenderId());
+                    }
+                    break;
 
-         case 3:
-             System.out.print("Enter User ID to accept: ");
-             targetId = readInt();
-             connectionService.acceptRequest(
-                     targetId, loggedInUser.getUserId());
-             break;
+                case 3:
+                    System.out.print("Enter User ID to accept: ");
+                    targetId = readInt();
+                    connectionService.acceptRequest(
+                            targetId, loggedInUser.getUserId());
+                    break;
 
-         case 4:
-             System.out.print("Enter User ID to reject: ");
-             targetId = readInt();
-             connectionService.rejectRequest(
-                     targetId, loggedInUser.getUserId());
-             break;
+                case 4:
+                    System.out.print("Enter User ID to reject: ");
+                    targetId = readInt();
+                    connectionService.rejectRequest(
+                            targetId, loggedInUser.getUserId());
+                    break;
 
-         case 5:
-             System.out.println("\n--- My Connections ---");
-             for (com.revconnect.model.UserConnection c :
-                     connectionService.getConnections(loggedInUser.getUserId())) {
+                case 5:
+                    System.out.println("\n--- My Connections ---");
+                    for (com.revconnect.model.UserConnection c :
+                            connectionService.getConnections(loggedInUser.getUserId())) {
 
-                 int connectedUser =
-                         (c.getSenderId() == loggedInUser.getUserId())
-                                 ? c.getReceiverId()
-                                 : c.getSenderId();
+                        int connectedUser =
+                                (c.getSenderId() == loggedInUser.getUserId())
+                                        ? c.getReceiverId()
+                                        : c.getSenderId();
 
-                 System.out.println("Connected with User ID: " + connectedUser);
-             }
-             break;
+                        System.out.println("Connected with User ID: " + connectedUser);
+                    }
+                    break;
 
-         case 6:
-             System.out.print("Enter User ID to remove: ");
-             targetId = readInt();
-             connectionService.removeConnection(
-                     loggedInUser.getUserId(), targetId);
-             break;
+                case 6:
+                    System.out.print("Enter User ID to remove: ");
+                    targetId = readInt();
+                    connectionService.removeConnection(
+                            loggedInUser.getUserId(), targetId);
+                    break;
 
-         case 7:
-             return;
+                case 7:
+                    return;
 
-         default:
-             System.out.println("Invalid choice");
-     }
- }
-}
-//===================== FOLLOW MENU =====================
-private void followMenu() {
+                default:
+                    System.out.println("Invalid choice");
+            }
+        }
+    }
 
- while (true) {
-     System.out.println("\n--- Follow System ---");
-     
-     System.out.println("Total Followers: " +
-             connectionService.getFollowerCount(
-                 loggedInUser.getUserId()));
-     System.out.println("1. Follow User");
-     System.out.println("2. Unfollow User");
-     System.out.println("3. View Followers");
-     System.out.println("4. View Following");
-     System.out.println("5. Back");
+    // ===================== FOLLOW =====================
+    private void followMenu() {
 
-     System.out.print("Choose: ");
-     int choice = readInt();
-     int targetId;
+        while (true) {
 
-     switch (choice) {
+            System.out.println("\n--- Follow System ---");
 
-         case 1:
-             System.out.print("Enter User ID to follow: ");
-             targetId = readInt();
-             connectionService.follow(
-                     loggedInUser.getUserId(), targetId);
-             break;
+            System.out.println("Total Followers: " +
+                    connectionService.getFollowerCount(
+                            loggedInUser.getUserId()));
 
-         case 2:
-             System.out.print("Enter User ID to unfollow: ");
-             targetId = readInt();
-             connectionService.unfollow(
-                     loggedInUser.getUserId(), targetId);
-             break;
+            System.out.println("1. Follow User");
+            System.out.println("2. Unfollow User");
+            System.out.println("3. View Followers");
+            System.out.println("4. View Following");
+            System.out.println("5. Back");
 
-         case 3:
-             System.out.println("\n--- My Followers ---");
-             for (com.revconnect.model.UserConnection c :
-                     connectionService.getFollowers(loggedInUser.getUserId())) {
-                 System.out.println("Follower User ID: " + c.getSenderId());
-             }
-             break;
+            System.out.print("Choose: ");
+            int choice = readInt();
+            int targetId;
 
-         case 4:
-             System.out.println("\n--- I Am Following ---");
-             for (com.revconnect.model.UserConnection c :
-                     connectionService.getFollowing(loggedInUser.getUserId())) {
-                 System.out.println("Following User ID: " + c.getReceiverId());
-             }
-             break;
+            switch (choice) {
 
-         case 5:
-             return;
+                case 1:
+                    System.out.print("Enter User ID to follow: ");
+                    targetId = readInt();
+                    connectionService.follow(
+                            loggedInUser.getUserId(), targetId);
+                    break;
 
-         default:
-             System.out.println("Invalid choice");
-     }
- }
-}
+                case 2:
+                    System.out.print("Enter User ID to unfollow: ");
+                    targetId = readInt();
+                    connectionService.unfollow(
+                            loggedInUser.getUserId(), targetId);
+                    break;
 
+                case 3:
+                    System.out.println("\n--- My Followers ---");
+                    for (com.revconnect.model.UserConnection c :
+                            connectionService.getFollowers(loggedInUser.getUserId())) {
+                        System.out.println("Follower User ID: " + c.getSenderId());
+                    }
+                    break;
 
+                case 4:
+                    System.out.println("\n--- I Am Following ---");
+                    for (com.revconnect.model.UserConnection c :
+                            connectionService.getFollowing(loggedInUser.getUserId())) {
+                        System.out.println("Following User ID: " + c.getReceiverId());
+                    }
+                    break;
+
+                case 5:
+                    return;
+
+                default:
+                    System.out.println("Invalid choice");
+            }
+        }
+    }
+
+    // ===================== MESSAGES =====================
+    private void messagesMenu() {
+        System.out.println("Messages menu working");
+    }
 }

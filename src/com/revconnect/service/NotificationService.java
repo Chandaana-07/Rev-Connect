@@ -55,7 +55,7 @@ public class NotificationService {
         List<Notification> list = getAll();
         for (Notification n : list) {
             if (n.getUserId() == userId) {
-                n.markRead();
+                n.setRead(true);
             }
         }
         saveAll(list);
@@ -71,4 +71,19 @@ public class NotificationService {
             System.out.println("Error saving notifications");
         }
     }
-}
+    public void markRead(int userId) {
+        markAllRead(userId);
+    }
+    public void notifyUser(int userId, String message) {
+        addNotification(
+                new com.revconnect.model.Notification(
+                        userId,
+                        "FOLLOW",
+                        message
+                )
+        );
+    }
+
+    }
+
+

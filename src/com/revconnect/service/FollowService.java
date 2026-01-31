@@ -32,23 +32,27 @@ public class FollowService {
         return success;
     }
 
-    // ---------------- UNFOLLOW USER ----------------
+   
     public boolean unfollowUser(int followerId, int followingId) {
         return dao.unfollowUser(followerId, followingId);
     }
 
-    // ---------------- GET FOLLOWERS ----------------
+   
     public List<Follow> getFollowers(int userId) {
         return dao.getFollowers(userId);
     }
 
-    // ---------------- GET FOLLOWING ----------------
+    
     public List<Follow> getFollowing(int userId) {
         return dao.getFollowing(userId);
     }
 
-    // ---------------- CHECK ----------------
+    
     public boolean isFollowing(int followerId, int followingId) {
         return dao.isFollowing(followerId, followingId);
     }
+    public void notifyUser(int userId, String message) {
+        // Stub method to avoid compile error
+    }
+
 }

@@ -1,9 +1,12 @@
 package com.revconnect.service;
 
+import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.revconnect.dao.PostDAO;
 import com.revconnect.dao.impl.PostDAOImpl;
+import com.revconnect.db.DBConnection;
 import com.revconnect.model.Post;
 
 public class PostService {
@@ -15,93 +18,167 @@ public class PostService {
     }
 
     // ---------------- CREATE ----------------
-    public boolean createPost(Post post) {
-        return dao.createPost(post);
+    public boolean createPost(int userId, String postName, String content, String postType) {
+
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+            return dao.createPost(con, userId, postName, content, postType);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(con);
+        }
+        return false;
     }
 
     // ---------------- VIEW MY POSTS ----------------
     public List<Post> getPostsByUser(int userId) {
-        return dao.getPostsByUser(userId);
+
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+            return dao.getPostsByUser(con, userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(con);
+        }
+        return new ArrayList<Post>();
     }
 
     // ---------------- GLOBAL FEED ----------------
     public List<Post> getAllPosts() {
-        return dao.getAllPosts();
+
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+            return dao.getAllPosts(con);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(con);
+        }
+        return new ArrayList<Post>();
     }
 
     // ---------------- CONNECTION FEED ----------------
     public List<Post> getFeedPosts(int userId) {
-        return dao.getFeedPosts(userId);
-    }
 
-    // ---------------- EDIT ----------------
-    public boolean updatePost(int postId, int userId, String content) {
-        return dao.updatePost(postId, userId, content);
-    }
-
-    // ---------------- DELETE ----------------
-    public boolean deletePost(int postId, int userId) {
-        return dao.deletePost(postId, userId);
-    }
-
-    // ---------------- OWNER CHECK ----------------
-    public int getPostOwnerId(int postId) {
-        return dao.getPostOwnerId(postId);
-    }
-   
-    public List<Post> searchByHashtag(String tag) {
-        return dao.searchByHashtag(tag);
-    }
-    public List<String> getTrendingHashtags() {
-        return dao.getTrendingHashtags();
-    }
-  
-    public List<Post> getFilteredFeed(int userId, String type) {
-
-        List<Post> posts = getFeedPosts(userId);
-        List<Post> filtered = new java.util.ArrayList<Post>();
-
-        if (type.equals("MY_POSTS")) {
-            for (Post p : posts) {
-                if (p.getUserId() == userId) {
-                    filtered.add(p);
-                }
-            }
-            return filtered;
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+            return dao.getFeedPosts(con, userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(con);
         }
-
-        if (type.equals("CREATORS")) {
-            return posts;
-        }
-
-        return posts;
+        return new ArrayList<Post>();
     }
 
-    public boolean editPost(int postId, int userId, String newContent) {
+    // ---------------- EDIT BY POST NAME ----------------
+    public boolean updatePostByName(int userId, String postName, String newContent) {
 
-        List<Post> posts = getPostsByUser(userId);
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
 
-        for (Post p : posts) {
-            if (p.getPostId() == postId) {
-                p.setContent(newContent);
-                return true;
+            int postId = dao.getPostIdByName(con, postName, userId);
+            if (postId == -1) {
+                System.out.println("Post not found!");
+                return false;
             }
+
+            return dao.updatePost(con, postId, userId, newContent);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(con);
         }
         return false;
     }
- // ===================== PROMOTIONAL POST =====================
-    public boolean createPromoPost(Post post) {
-        post.setPostType("PROMO");
-        return dao.createPost(post);
+
+    // ---------------- DELETE BY POST NAME ----------------
+    public boolean deletePostByName(int userId, String postName) {
+
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+
+            int postId = dao.getPostIdByName(con, postName, userId);
+            if (postId == -1) {
+                System.out.println("Post not found!");
+                return false;
+            }
+
+            return dao.deletePost(con, postId, userId);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(con);
+        }
+        return false;
     }
 
-    // ===================== POST ANALYTICS =====================
-    public Post getPostAnalytics(int postId) {
-        return dao.getPostById(postId);
+    // ---------------- SEARCH BY HASHTAG ----------------
+    public List<Post> searchByHashtag(String tag) {
+
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+            return dao.searchByHashtag(con, tag);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(con);
+        }
+        return new ArrayList<Post>();
     }
+
+    // ---------------- TRENDING HASHTAGS ----------------
+    public List<String> getTrendingHashtags() {
+
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+            return dao.getTrendingHashtags(con);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(con);
+        }
+        return new ArrayList<String>();
+    }
+
+    // ---------------- POST ANALYTICS ----------------
+    public Post getPostAnalytics(int postId) {
+
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+            return dao.getPostById(con, postId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(con);
+        }
+        return null;
+    }
+
+    // ---------------- SHARE ----------------
     public void sharePost(int postId, String targetUser) {
         System.out.println("Sharing post ID " + postId + " with user " + targetUser);
-
     }
 
+    // ---------------- UTILITY ----------------
+    private void close(Connection con) {
+        try {
+            if (con != null) con.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

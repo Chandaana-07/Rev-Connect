@@ -3,28 +3,23 @@ package com.revconnect.dao.impl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.revconnect.dao.UserDAO;
-import com.revconnect.db.DBConnection;
 import com.revconnect.model.User;
 import com.revconnect.util.PasswordUtil;
-import java.util.List;
-import java.util.ArrayList;
-
 
 public class UserDAOImpl implements UserDAO {
 
     // ---------------- LOGIN ----------------
     @Override
-    public User login(String email, String password) {
+    public User login(Connection con, String email, String password) {
 
-        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
                 "SELECT USER_ID, USERNAME, EMAIL, ROLE " +
                 "FROM USERS WHERE EMAIL = ? AND PASSWORD_HASH = ?";
@@ -47,13 +42,7 @@ public class UserDAOImpl implements UserDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(rs, ps);
         }
 
         return null;
@@ -61,14 +50,11 @@ public class UserDAOImpl implements UserDAO {
 
     // ---------------- REGISTER ----------------
     @Override
-    public boolean register(User user) {
+    public boolean register(Connection con, User user) {
 
-        Connection con = null;
         PreparedStatement ps = null;
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
                 "INSERT INTO USERS (USERNAME, EMAIL, PASSWORD_HASH, ROLE) " +
                 "VALUES (?, ?, ?, ?)";
@@ -84,12 +70,7 @@ public class UserDAOImpl implements UserDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(null, ps);
         }
 
         return false;
@@ -97,14 +78,11 @@ public class UserDAOImpl implements UserDAO {
 
     // ---------------- UPDATE PROFILE ----------------
     @Override
-    public boolean updateProfile(User user) {
+    public boolean updateProfile(Connection con, User user) {
 
-        Connection con = null;
         PreparedStatement ps = null;
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
                 "UPDATE USERS SET BIO=?, LOCATION=?, WEBSITE=? WHERE USER_ID=?";
 
@@ -119,12 +97,7 @@ public class UserDAOImpl implements UserDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(null, ps);
         }
 
         return false;
@@ -132,15 +105,12 @@ public class UserDAOImpl implements UserDAO {
 
     // ---------------- USER SEARCH (EXACT) ----------------
     @Override
-    public User getUserByUsername(String username) {
+    public User getUserByUsername(Connection con, String username) {
 
-        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
                 "SELECT USER_ID, USERNAME, EMAIL, BIO, LOCATION, WEBSITE " +
                 "FROM USERS WHERE USERNAME = ?";
@@ -164,13 +134,7 @@ public class UserDAOImpl implements UserDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(rs, ps);
         }
 
         return null;
@@ -178,15 +142,12 @@ public class UserDAOImpl implements UserDAO {
 
     // ---------------- USER SEARCH (CASE INSENSITIVE) ----------------
     @Override
-    public User getUserByUsernameIgnoreCase(String username) {
+    public User getUserByUsernameIgnoreCase(Connection con, String username) {
 
-        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
                 "SELECT USER_ID, USERNAME, EMAIL, BIO, LOCATION, WEBSITE " +
                 "FROM USERS WHERE UPPER(USERNAME) = UPPER(?)";
@@ -210,13 +171,7 @@ public class UserDAOImpl implements UserDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(rs, ps);
         }
 
         return null;
@@ -224,15 +179,12 @@ public class UserDAOImpl implements UserDAO {
 
     // ---------------- DUPLICATE EMAIL ----------------
     @Override
-    public User getUserByEmail(String email) {
+    public User getUserByEmail(Connection con, String email) {
 
-        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
                 "SELECT USER_ID, USERNAME, EMAIL FROM USERS WHERE EMAIL = ?";
 
@@ -252,13 +204,7 @@ public class UserDAOImpl implements UserDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(rs, ps);
         }
 
         return null;
@@ -266,20 +212,17 @@ public class UserDAOImpl implements UserDAO {
 
     // ---------------- DUPLICATE USERNAME ----------------
     @Override
-    public User getUserByUsernameExact(String username) {
-        return getUserByUsername(username);
+    public User getUserByUsernameExact(Connection con, String username) {
+        return getUserByUsername(con, username);
     }
 
     // ---------------- FORGOT PASSWORD ----------------
     @Override
-    public boolean resetPassword(String email, String newPassword) {
+    public boolean resetPassword(Connection con, String email, String newPassword) {
 
-        Connection con = null;
         PreparedStatement ps = null;
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
                 "UPDATE USERS SET PASSWORD_HASH = ? WHERE EMAIL = ?";
 
@@ -292,31 +235,24 @@ public class UserDAOImpl implements UserDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(null, ps);
         }
 
         return false;
     }
+
+    // ---------------- SEARCH USERS ----------------
     @Override
-    public List<User> searchUsers(String keyword) {
+    public List<User> searchUsers(Connection con, String keyword) {
 
         List<User> list = new ArrayList<User>();
-        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
                 "SELECT USER_ID, USERNAME, EMAIL, BIO, LOCATION, WEBSITE " +
-                "FROM USERS " +
-                "WHERE LOWER(USERNAME) LIKE LOWER(?)";
+                "FROM USERS WHERE LOWER(USERNAME) LIKE LOWER(?)";
 
             ps = con.prepareStatement(sql);
             ps.setString(1, "%" + keyword + "%");
@@ -331,41 +267,52 @@ public class UserDAOImpl implements UserDAO {
                 user.setBio(rs.getString("BIO"));
                 user.setLocation(rs.getString("LOCATION"));
                 user.setWebsite(rs.getString("WEBSITE"));
-
                 list.add(user);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(rs, ps);
         }
 
         return list;
     }
+
+    // ---------------- GET USER ID ----------------
     @Override
-    public int getUserIdByUsername(String username) {
-        String sql = "SELECT user_id FROM users WHERE username = ?";
+    public int getUserIdByUsername(Connection con, String username) {
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
         try {
-            java.sql.Connection con = DBConnection.getConnection();
-            java.sql.PreparedStatement ps = con.prepareStatement(sql);
+            String sql = "SELECT USER_ID FROM USERS WHERE USERNAME = ?";
+
+            ps = con.prepareStatement(sql);
             ps.setString(1, username);
 
-            java.sql.ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getInt("user_id");
+                return rs.getInt("USER_ID");
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(rs, ps);
+        }
+
+        return -1;
+    }
+
+    // ---------------- UTILITY ----------------
+    private void close(ResultSet rs, PreparedStatement ps) {
+        try {
+            if (rs != null) rs.close();
+            if (ps != null) ps.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return -1; // not found
     }
-
-
 }

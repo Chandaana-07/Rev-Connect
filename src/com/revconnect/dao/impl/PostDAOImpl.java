@@ -3,49 +3,39 @@ package com.revconnect.dao.impl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.revconnect.dao.PostDAO;
-import com.revconnect.db.DBConnection;
 import com.revconnect.model.Post;
 
 public class PostDAOImpl implements PostDAO {
 
-    // ---------------- CREATE POST ----------------
+    // ---------------- CREATE ----------------
     @Override
-    public boolean createPost(Post post) {
+    public boolean createPost(Connection con, int userId, String postName, String content, String postType) {
 
-        Connection con = null;
         PreparedStatement ps = null;
 
         try {
-            con = DBConnection.getConnection();
-
-            String sql = "INSERT INTO posts " +
-                    "(user_id, content, post_type, cta_text, tagged_product_id, scheduled_time) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)";
+            String sql =
+                "INSERT INTO POSTS (USER_ID, POST_NAME, CONTENT, POST_TYPE) " +
+                "VALUES (?, ?, ?, ?)";
 
             ps = con.prepareStatement(sql);
-            ps.setInt(1, post.getUserId());
-            ps.setString(2, post.getContent());
-            ps.setString(3, post.getPostType());
-            ps.setString(4, post.getCtaText());
-            ps.setInt(5, post.getTaggedProductId());
-            ps.setTimestamp(6, post.getScheduledTime());
+            ps.setInt(1, userId);
+            ps.setString(2, postName);
+            ps.setString(3, content);
+            ps.setString(4, postType);
 
             return ps.executeUpdate() > 0;
 
+        } catch (java.sql.SQLIntegrityConstraintViolationException e) {
+            System.out.println("You already have a post with this name. Please choose a different name.");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(ps, null);
         }
 
         return false;
@@ -53,184 +43,115 @@ public class PostDAOImpl implements PostDAO {
 
     // ---------------- VIEW MY POSTS ----------------
     @Override
-    public List<Post> getPostsByUser(int userId) {
+    public List<Post> getPostsByUser(Connection con, int userId) {
 
         List<Post> list = new ArrayList<Post>();
-        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
-                "SELECT P.POST_ID, P.USER_ID, U.USERNAME, P.CONTENT, P.CREATED_AT " +
-                "FROM POSTS P " +
-                "JOIN USERS U ON P.USER_ID = U.USER_ID " +
-                "WHERE P.USER_ID = ? " +
-                "ORDER BY P.CREATED_AT DESC";
+                "SELECT p.POST_ID, p.POST_NAME, p.CONTENT, p.CREATED_AT, " +
+                "p.POST_TYPE, p.REACH, u.USERNAME " +
+                "FROM POSTS p " +
+                "JOIN USERS u ON p.USER_ID = u.USER_ID " +
+                "WHERE p.USER_ID = ? " +
+                "ORDER BY p.CREATED_AT DESC";
 
             ps = con.prepareStatement(sql);
             ps.setInt(1, userId);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Post p = new Post();  
+
+                p.setPostId(rs.getInt("POST_ID"));
+                p.setPostName(rs.getString("POST_NAME"));
+                p.setContent(rs.getString("CONTENT"));
+                p.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                p.setPostType(rs.getString("POST_TYPE"));
+                p.setReach(rs.getInt("REACH"));
+                p.setUsername(rs.getString("USERNAME"));
+                p.setUserId(userId);
+
+                list.add(p);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(ps, rs);
+        }
+
+        return list;
+    }
+
+
+ // ---------------- GLOBAL FEED ----------------
+    @Override
+    public List<Post> getAllPosts(Connection con) {
+
+        List<Post> list = new ArrayList<Post>();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            String sql =
+                "SELECT p.POST_ID, p.USER_ID, p.POST_NAME, p.CONTENT, p.CREATED_AT, " +
+                "p.POST_TYPE, p.REACH, u.USERNAME " +
+                "FROM POSTS p " +
+                "JOIN USERS u ON p.USER_ID = u.USER_ID " +
+                "ORDER BY p.CREATED_AT DESC";
+
+            ps = con.prepareStatement(sql);
+
             rs = ps.executeQuery();
 
             while (rs.next()) {
                 Post p = new Post();
                 p.setPostId(rs.getInt("POST_ID"));
                 p.setUserId(rs.getInt("USER_ID"));
-                p.setUsername(rs.getString("USERNAME"));
+                p.setPostName(rs.getString("POST_NAME"));
                 p.setContent(rs.getString("CONTENT"));
                 p.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                p.setPostType(rs.getString("POST_TYPE"));
+                p.setReach(rs.getInt("REACH"));
+                p.setUsername(rs.getString("USERNAME")); // Optional but useful
+
                 list.add(p);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(ps, rs);
         }
 
         return list;
     }
 
-    // ---------------- GLOBAL FEED ----------------
-    @Override
-    public List<Post> getAllPosts() {
-
-        List<Post> posts = new ArrayList<Post>();
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-            con = DBConnection.getConnection();
-
-            String sql =
-                "SELECT P.POST_ID, P.USER_ID, U.USERNAME, P.CONTENT, P.CREATED_AT " +
-                "FROM POSTS P " +
-                "JOIN USERS U ON P.USER_ID = U.USER_ID " +
-                "ORDER BY P.CREATED_AT DESC";
-
-            ps = con.prepareStatement(sql);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                Post post = new Post();
-                post.setPostId(rs.getInt("POST_ID"));
-                post.setUserId(rs.getInt("USER_ID"));
-                post.setUsername(rs.getString("USERNAME"));
-                post.setContent(rs.getString("CONTENT"));
-                post.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                posts.add(post);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return posts;
-    }
 
     // ---------------- CONNECTION FEED ----------------
     @Override
-    public List<Post> getFeedPosts(int userId) {
-
-        List<Post> list = new ArrayList<Post>();
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-            con = DBConnection.getConnection();
-
-            String sql =
-                "SELECT P.POST_ID, P.CONTENT, P.CREATED_AT, U.USERNAME, " +
-                "P.CTA_TEXT, P.REACH " +
-                "FROM POSTS P " +
-                "JOIN USERS U ON P.USER_ID = U.USER_ID " +
-                "WHERE ( " +
-                "   P.USER_ID = ? " +
-                "   OR P.USER_ID IN ( " +
-                "       SELECT CASE " +
-                "           WHEN SENDER_ID = ? THEN RECEIVER_ID " +
-                "           ELSE SENDER_ID " +
-                "       END " +
-                "       FROM CONNECTIONS " +
-                "       WHERE (SENDER_ID = ? OR RECEIVER_ID = ?) " +
-                "       AND STATUS = 'ACCEPTED' " +
-                "   ) " +
-                ") " +
-                "AND (P.SCHEDULED_TIME IS NULL OR P.SCHEDULED_TIME <= SYSTIMESTAMP) " +
-                "ORDER BY P.CREATED_AT DESC";
-
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, userId);
-            ps.setInt(2, userId);
-            ps.setInt(3, userId);
-            ps.setInt(4, userId);
-
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                Post p = new Post();
-                p.setPostId(rs.getInt("POST_ID"));
-                p.setContent(rs.getString("CONTENT"));
-                p.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                p.setUsername(rs.getString("USERNAME"));
-                p.setCtaText(rs.getString("CTA_TEXT"));
-                p.setReach(rs.getInt("REACH"));
-
-                // increment reach each time feed is viewed
-                incrementReach(p.getPostId());
-
-                list.add(p);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return list;
+    public List<Post> getFeedPosts(Connection con, int userId) {
+        // For now, same as global feed
+        return getAllPosts(con);
     }
 
-    // ---------------- EDIT POST ----------------
+    // ---------------- UPDATE ----------------
     @Override
-    public boolean updatePost(int postId, int userId, String newContent) {
+    public boolean updatePost(Connection con, int postId, int userId, String content) {
 
-        Connection con = null;
         PreparedStatement ps = null;
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
                 "UPDATE POSTS SET CONTENT = ? " +
                 "WHERE POST_ID = ? AND USER_ID = ?";
 
             ps = con.prepareStatement(sql);
-            ps.setString(1, newContent);
+            ps.setString(1, content);
             ps.setInt(2, postId);
             ps.setInt(3, userId);
 
@@ -239,30 +160,21 @@ public class PostDAOImpl implements PostDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(ps, null);
         }
 
         return false;
     }
 
-    // ---------------- DELETE POST ----------------
+    // ---------------- DELETE ----------------
     @Override
-    public boolean deletePost(int postId, int userId) {
+    public boolean deletePost(Connection con, int postId, int userId) {
 
-        Connection con = null;
         PreparedStatement ps = null;
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
-                "DELETE FROM POSTS " +
-                "WHERE POST_ID = ? AND USER_ID = ?";
+                "DELETE FROM POSTS WHERE POST_ID = ? AND USER_ID = ?";
 
             ps = con.prepareStatement(sql);
             ps.setInt(1, postId);
@@ -273,98 +185,80 @@ public class PostDAOImpl implements PostDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(ps, null);
         }
 
         return false;
     }
 
-    // ---------------- POST OWNER CHECK ----------------
+    // ---------------- GET POST ID BY NAME ----------------
     @Override
-    public int getPostOwnerId(int postId) {
+    public int getPostIdByName(Connection con, String postName, int userId) {
 
-        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
-                "SELECT USER_ID FROM POSTS WHERE POST_ID = ?";
+                "SELECT POST_ID FROM POSTS " +
+                "WHERE POST_NAME = ? AND USER_ID = ?";
 
             ps = con.prepareStatement(sql);
-            ps.setInt(1, postId);
+            ps.setString(1, postName);
+            ps.setInt(2, userId);
 
             rs = ps.executeQuery();
 
             if (rs.next()) {
-                return rs.getInt("USER_ID");
+                return rs.getInt("POST_ID");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(ps, rs);
         }
 
-        return 0;
+        return -1;
     }
 
-    // ---------------- SEARCH POSTS BY HASHTAG ----------------
+    // ---------------- SEARCH BY HASHTAG ----------------
     @Override
-    public List<Post> searchByHashtag(String tag) {
+    public List<Post> searchByHashtag(Connection con, String tag) {
 
         List<Post> list = new ArrayList<Post>();
-        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
-                "SELECT p.POST_ID, p.CONTENT, p.CREATED_AT, u.USERNAME " +
-                "FROM POSTS p " +
-                "JOIN USERS u ON p.USER_ID = u.USER_ID " +
-                "WHERE LOWER(p.CONTENT) LIKE ? " +
-                "ORDER BY p.CREATED_AT DESC";
+                "SELECT POST_ID, USER_ID, POST_NAME, CONTENT, CREATED_AT, POST_TYPE, REACH " +
+                "FROM POSTS " +
+                "WHERE CONTENT LIKE ? " +
+                "ORDER BY CREATED_AT DESC";
 
             ps = con.prepareStatement(sql);
-            ps.setString(1, "%" + tag.toLowerCase() + "%");
+            ps.setString(1, "%" + tag + "%");
 
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                Post post = new Post();
-                post.setPostId(rs.getInt("POST_ID"));
-                post.setUsername(rs.getString("USERNAME"));
-                post.setContent(rs.getString("CONTENT"));
-                post.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                list.add(post);
+                Post p = new Post();
+                p.setPostId(rs.getInt("POST_ID"));
+                p.setUserId(rs.getInt("USER_ID"));
+                p.setPostName(rs.getString("POST_NAME"));
+                p.setContent(rs.getString("CONTENT"));
+                p.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                p.setPostType(rs.getString("POST_TYPE"));
+                p.setReach(rs.getInt("REACH"));
+
+                list.add(p);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(ps, rs);
         }
 
         return list;
@@ -372,132 +266,44 @@ public class PostDAOImpl implements PostDAO {
 
     // ---------------- TRENDING HASHTAGS ----------------
     @Override
-    public List<String> getTrendingHashtags() {
+    public List<String> getTrendingHashtags(Connection con) {
 
         List<String> list = new ArrayList<String>();
-        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
-                "SELECT * FROM ( " +
-                "   SELECT hashtag, COUNT(*) AS cnt " +
-                "   FROM POST_HASHTAGS " +
-                "   GROUP BY hashtag " +
-                "   ORDER BY cnt DESC " +
-                ") WHERE ROWNUM <= 10";
+                "SELECT SUBSTR(CONTENT, INSTR(CONTENT, '#')) AS TAG " +
+                "FROM POSTS " +
+                "WHERE CONTENT LIKE '#%'";
 
             ps = con.prepareStatement(sql);
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                list.add(
-                    rs.getString("hashtag") +
-                    " (" + rs.getInt("cnt") + " posts)"
-                );
+                list.add(rs.getString("TAG"));
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(ps, rs);
         }
 
         return list;
     }
 
-    // ---------------- FILTER FEED ----------------
+    // ---------------- POST BY ID ----------------
     @Override
-    public List<Post> getFilteredFeed(int userId, String type) {
+    public Post getPostById(Connection con, int postId) {
 
-        List<Post> list = new ArrayList<Post>();
-        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            con = DBConnection.getConnection();
-
-            String sql;
-
-            if ("MY_POSTS".equals(type)) {
-                sql =
-                    "SELECT p.POST_ID, p.CONTENT, p.CREATED_AT, u.USERNAME " +
-                    "FROM POSTS p JOIN USERS u ON p.USER_ID = u.USER_ID " +
-                    "WHERE p.USER_ID = ? " +
-                    "ORDER BY p.CREATED_AT DESC";
-
-                ps = con.prepareStatement(sql);
-                ps.setInt(1, userId);
-            }
-            else if ("CREATORS".equals(type)) {
-                sql =
-                    "SELECT p.POST_ID, p.CONTENT, p.CREATED_AT, u.USERNAME " +
-                    "FROM POSTS p JOIN USERS u ON p.USER_ID = u.USER_ID " +
-                    "WHERE u.ROLE IN ('BUSINESS','CREATOR') " +
-                    "ORDER BY p.CREATED_AT DESC";
-
-                ps = con.prepareStatement(sql);
-            }
-            else {
-                sql =
-                    "SELECT p.POST_ID, p.CONTENT, p.CREATED_AT, u.USERNAME " +
-                    "FROM POSTS p JOIN USERS u ON p.USER_ID = u.USER_ID " +
-                    "ORDER BY p.CREATED_AT DESC";
-
-                ps = con.prepareStatement(sql);
-            }
-
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                Post p = new Post();
-                p.setPostId(rs.getInt("POST_ID"));
-                p.setContent(rs.getString("CONTENT"));
-                p.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                p.setUsername(rs.getString("USERNAME"));
-                list.add(p);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return list;
-    }
-
-    // ---------------- POST ANALYTICS SUPPORT ----------------
-    @Override
-    public Post getPostById(int postId) {
-
-        Post p = null;
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-            con = DBConnection.getConnection();
-
             String sql =
-                "SELECT POST_ID, CONTENT, POST_TYPE, CTA_TEXT, TAGGED_PRODUCT_ID, " +
-                "SCHEDULED_TIME, REACH " +
+                "SELECT POST_ID, USER_ID, POST_NAME, CONTENT, CREATED_AT, POST_TYPE, REACH " +
                 "FROM POSTS WHERE POST_ID = ?";
 
             ps = con.prepareStatement(sql);
@@ -506,42 +312,31 @@ public class PostDAOImpl implements PostDAO {
             rs = ps.executeQuery();
 
             if (rs.next()) {
-                p = new Post();
+                Post p = new Post();
                 p.setPostId(rs.getInt("POST_ID"));
+                p.setUserId(rs.getInt("USER_ID"));
+                p.setPostName(rs.getString("POST_NAME"));
                 p.setContent(rs.getString("CONTENT"));
+                p.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                 p.setPostType(rs.getString("POST_TYPE"));
-                p.setCtaText(rs.getString("CTA_TEXT"));
-                p.setTaggedProductId(rs.getInt("TAGGED_PRODUCT_ID"));
-                p.setScheduledTime(rs.getTimestamp("SCHEDULED_TIME"));
                 p.setReach(rs.getInt("REACH"));
+                return p;
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(ps, rs);
         }
 
-        return p;
+        return null;
     }
 
-    // ---------------- REACH COUNTER ----------------
-    @Override
-    public void incrementReach(int postId) {
+    // ---------------- UTILITY ----------------
+    private void close(PreparedStatement ps, ResultSet rs) {
         try {
-            Connection con = DBConnection.getConnection();
-            String sql = "UPDATE posts SET reach = reach + 1 WHERE post_id=?";
-            PreparedStatement ps = con.prepareStatement(sql);
-            ps.setInt(1, postId);
-            ps.executeUpdate();
-            ps.close();
-            con.close();
+            if (rs != null) rs.close();
+            if (ps != null) ps.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

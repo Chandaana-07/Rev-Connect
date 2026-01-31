@@ -18,7 +18,7 @@ public class LikeDAOImpl implements LikeDAO {
         try {
             con = DBConnection.getConnection();
 
-            if (hasUserLiked(postId, userId)) {
+            if (hasUserLiked(con, postId, userId)) {
                 return false;
             }
 
@@ -115,24 +115,19 @@ public class LikeDAOImpl implements LikeDAO {
     }
 
     @Override
-    public boolean hasUserLiked(int postId, int userId) {
+    public boolean hasUserLiked(Connection con, int postId, int userId) {
 
-        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            con = DBConnection.getConnection();
-
-            String sql =
-                "SELECT 1 FROM LIKES WHERE POST_ID = ? AND USER_ID = ?";
+            String sql = "SELECT 1 FROM LIKES WHERE POST_ID = ? AND USER_ID = ?";
 
             ps = con.prepareStatement(sql);
             ps.setInt(1, postId);
             ps.setInt(2, userId);
 
             rs = ps.executeQuery();
-
             return rs.next();
 
         } catch (Exception e) {
@@ -141,7 +136,6 @@ public class LikeDAOImpl implements LikeDAO {
             try {
                 if (rs != null) rs.close();
                 if (ps != null) ps.close();
-                if (con != null) con.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -149,4 +143,6 @@ public class LikeDAOImpl implements LikeDAO {
 
         return false;
     }
+
+
 }

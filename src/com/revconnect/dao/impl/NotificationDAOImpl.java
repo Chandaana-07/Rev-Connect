@@ -71,7 +71,7 @@ public class NotificationDAOImpl implements NotificationDAO {
 
             while (rs.next()) {
                 Notification n = new Notification();
-                n.setNotifId(rs.getInt("NOTIF_ID"));
+                n.setNotificationId(rs.getInt("notif_id"));
                 n.setUserId(rs.getInt("USER_ID"));
                 n.setMessage(rs.getString("MESSAGE"));
                 n.setRead(rs.getInt("IS_READ") == 1);

@@ -89,7 +89,7 @@ public class ConnectionService {
 
     // Follow User
     public void follow(int fromUser, int toUser) {
-        connections.add(new UserConnection(fromUser, toUser, "FOLLOWING"));
+        connections.add(new UserConnection(fromUser, toUser, "FOLLOWING"));     // call the followUser method in followDAOImpl
         System.out.println("Now following user.");
     }
 

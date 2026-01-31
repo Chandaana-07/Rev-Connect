@@ -6,6 +6,8 @@ public class Post {
 
     private int postId;
     private int userId;
+    private String postName;
+
     private String username;
     private String content;
     private java.sql.Timestamp createdAt;
@@ -60,6 +62,14 @@ public class Post {
     public String getCtaText() {
         return ctaText;
     }
+    public String getPostName() {
+        return postName;
+    }
+
+    public void setPostName(String postName) {
+        this.postName = postName;
+    }
+
 
     public void setCtaText(String ctaText) {
         this.ctaText = ctaText;

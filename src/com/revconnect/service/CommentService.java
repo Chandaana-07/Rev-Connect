@@ -16,8 +16,14 @@ public class CommentService {
 
     public void addComment(Comment c) {
         c.setCommentId(idCounter++);
-        comments.add(c);
-        System.out.println("Comment added.");
+        boolean comment = dao.addComment(c);
+        
+        if(comment){
+        	System.out.println("Comment added");
+        }
+        else{
+        	System.out.println("Comment not2 added");
+        }
     }
 
     public List<Comment> getCommentsByPost(int postId) {

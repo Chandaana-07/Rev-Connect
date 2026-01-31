@@ -1,4 +1,5 @@
 package com.revconnect.dao;
+import java.sql.Connection;
 
 public interface LikeDAO {
 
@@ -8,5 +9,5 @@ public interface LikeDAO {
 
     int getLikeCount(int postId);
 
-    boolean hasUserLiked(int postId, int userId);
+    boolean hasUserLiked(Connection con, int postId, int userId);
 }
