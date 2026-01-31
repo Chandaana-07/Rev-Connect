@@ -3,60 +3,38 @@ package com.revconnect.service;
 import java.util.ArrayList;
 import java.util.List;
 import com.revconnect.model.UserConnection;
+import com.revconnect.dao.ConnectionDAO;
+import com.revconnect.dao.impl.ConnectionDAOImpl;
 
 public class ConnectionService {
+	private ConnectionDAO connectionDAO=new ConnectionDAOImpl();
 
     private static List<UserConnection> connections = new ArrayList<UserConnection>();
 
     // ========== CONNECTIONS ==========
 
     // 1. Send Request
-    public void sendRequest(int fromUser, int toUser) {
-        connections.add(new UserConnection(fromUser, toUser, "PENDING"));
-        System.out.println("Connection request sent.");
+    
+ // 1. Send Request (DB version)
+    public boolean sendRequest(int senderId,int receiverId,String senderName, String receiverName) {
+        return connectionDAO.sendRequest(senderId,receiverId,senderName, receiverName);
     }
-
+    
     // 2. View Pending Requests
-    public List<UserConnection> getPending(int userId) {
-        List<UserConnection> list = new ArrayList<UserConnection>();
-        for (UserConnection c : connections) {
-            if (c.getReceiverId() == userId &&
-                c.getStatus().equals("PENDING")) {
-                list.add(c);
-            }
-        }
-        return list;
+    public List<UserConnection> getPendingRequests(int userId) {
+        return connectionDAO.getPendingRequests(userId);
     }
 
-    // 3. Accept Request
-    public void acceptRequest(int fromUser, int toUser) {
-        for (UserConnection c : connections) {
-            if (c.getSenderId() == fromUser &&
-                c.getReceiverId() == toUser &&
-                c.getStatus().equals("PENDING")) {
-
-                c.setStatus("ACCEPTED");
-                System.out.println("Connection accepted.");
-                return;
-            }
-        }
-        System.out.println("Request not found.");
+ // 3. Accept Request (DB version)
+    public boolean acceptRequest(int connectionId, int receiverId) {
+        return connectionDAO.acceptRequest(connectionId, receiverId);
     }
 
-    // 4. Reject Request
-    public void rejectRequest(int fromUser, int toUser) {
-        for (UserConnection c : connections) {
-            if (c.getSenderId() == fromUser &&
-                c.getReceiverId() == toUser &&
-                c.getStatus().equals("PENDING")) {
-
-                connections.remove(c);
-                System.out.println("Request rejected.");
-                return;
-            }
-        }
-        System.out.println("Request not found.");
+ // 4. Reject Request (DB version)
+    public boolean rejectRequest(int connectionId, int receiverId) {
+        return connectionDAO.rejectRequest(connectionId, receiverId);
     }
+  
 
     // 5. View My Connections
     public List<UserConnection> getConnections(int userId) {
@@ -71,20 +49,10 @@ public class ConnectionService {
         return list;
     }
 
-    // 6. Remove Connection
-    public void removeConnection(int user1, int user2) {
-        for (UserConnection c : connections) {
-            if ((c.getSenderId() == user1 && c.getReceiverId() == user2) ||
-                (c.getSenderId() == user2 && c.getReceiverId() == user1)) {
-
-                connections.remove(c);
-                System.out.println("Connection removed.");
-                return;
-            }
-        }
-        System.out.println("Connection not found.");
+ // 6. Remove Connection (DB version)
+    public boolean removeConnection(int connectionId, int userId) {
+        return connectionDAO.removeConnection(connectionId, userId);
     }
-
     // ========== FOLLOW SYSTEM ==========
 
     // Follow User

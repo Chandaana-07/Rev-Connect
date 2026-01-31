@@ -15,6 +15,11 @@ public class UserService {
     public UserService() {
         dao = new UserDAOImpl();
     }
+    
+    public UserService(UserDAO dao) {
+        this.dao = dao;
+    }
+
 
     // ---------------- REGISTER ----------------
     public boolean registerUser(User user) {

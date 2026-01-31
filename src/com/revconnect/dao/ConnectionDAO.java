@@ -5,8 +5,8 @@ import com.revconnect.model.UserConnection;
 
 public interface ConnectionDAO {
 
-    // Send a connection request
-    boolean sendRequest(int senderId, int receiverId);
+    
+    boolean sendRequest(int senderId, int receiverId, String senderName, String receiverName);
 
     // Accept a request
     boolean acceptRequest(int connectionId, int receiverId);

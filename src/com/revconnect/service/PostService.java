@@ -3,7 +3,8 @@ package com.revconnect.service;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-
+import com.revconnect.db.ConnectionProvider;
+import com.revconnect.db.DefaultConnectionProvider;
 import com.revconnect.dao.PostDAO;
 import com.revconnect.dao.impl.PostDAOImpl;
 import com.revconnect.db.DBConnection;
@@ -12,10 +13,22 @@ import com.revconnect.model.Post;
 public class PostService {
 
     private PostDAO dao;
+    private com.revconnect.db.ConnectionProvider connectionProvider;
 
+ 
     public PostService() {
-        dao = new PostDAOImpl();
+        this.dao = new PostDAOImpl();
+        this.connectionProvider = new DefaultConnectionProvider();
     }
+
+    
+    public PostService(PostDAO dao,
+                       com.revconnect.db.ConnectionProvider provider) {
+        this.dao = dao;                    
+        this.connectionProvider = provider; 
+    }
+
+   
 
     // ---------------- CREATE ----------------
     public boolean createPost(int userId, String postName, String content, String postType) {

@@ -1,60 +1,86 @@
 package com.revconnect.service;
 
-import com.revconnect.model.Message;
-
-import java.io.*;
-import java.util.ArrayList;
+import java.sql.Connection;
 import java.util.List;
+
+import com.revconnect.dao.MessageDAO;
+import com.revconnect.dao.impl.MessageDAOImpl;
+import com.revconnect.db.DBConnection;
+import com.revconnect.model.Message;
 
 public class MessageService {
 
-    private final String FILE = "messages.dat";
+    private MessageDAO dao = new MessageDAOImpl();
 
-    public void send(Message m) {
-        List<Message> list = getAll();
-        list.add(m);
-        saveAll(list);
-    }
-
-    public List<Message> getConversation(int u1, int u2) {
-        List<Message> result = new ArrayList<Message>();
-        for (Message m : getAll()) {
-            if ((m.getSenderId() == u1 && m.getReceiverId() == u2) ||
-                (m.getSenderId() == u2 && m.getReceiverId() == u1)) {
-                result.add(m);
-            }
-        }
-        return result;
-    }
-
-    public void markRead(int toId) {
-        List<Message> list = getAll();
-        for (Message m : list) {
-            if (m.getReceiverId() == toId) {
-                m.setRead(true);
-            }
-        }
-        saveAll(list);
-    }
-
-    private List<Message> getAll() {
+    // SEND MESSAGE
+    public boolean send(Message m) {
+        Connection con = null;
         try {
-            ObjectInputStream ois =
-                    new ObjectInputStream(new FileInputStream(FILE));
-            return (List<Message>) ois.readObject();
+            con = DBConnection.getConnection();
+            return dao.sendMessage(
+                con,
+                m.getSenderId(),
+                m.getReceiverId(),
+                m.getContent()
+            );
         } catch (Exception e) {
-            return new ArrayList<Message>();
+            e.printStackTrace();
+        } finally {
+            try {
+                if (con != null) con.close();
+            } catch (Exception e) {}
+        }
+        return false;
+    }
+
+    // GET CONVERSATION
+    public List<Message> getConversation(int user1, int user2) {
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+            return dao.getConversation(con, user1, user2);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (con != null) con.close();
+            } catch (Exception e) {}
+        }
+        return null;
+    }
+
+    // MARK READ
+    public void markRead(int userId) {
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+            dao.markRead(con, userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (con != null) con.close();
+            } catch (Exception e) {}
         }
     }
 
-    private void saveAll(List<Message> list) {
+    // INBOX
+    public List<Message> getInbox(int userId) {
+        Connection con = null;
         try {
-            ObjectOutputStream oos =
-                    new ObjectOutputStream(new FileOutputStream(FILE));
-            oos.writeObject(list);
-            oos.close();
+            con = DBConnection.getConnection();
+            return dao.getInbox(con, userId);
         } catch (Exception e) {
-            System.out.println("Error saving messages");
+            e.printStackTrace();
+        } finally {
+            try {
+                if (con != null) con.close();
+            } catch (Exception e) {}
         }
+        return null;
     }
+    public boolean sendMessage(int senderId, int receiverId, String content) {
+        return send(new com.revconnect.model.Message(senderId, receiverId, content));
+    }
+
 }

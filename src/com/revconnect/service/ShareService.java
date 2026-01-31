@@ -18,4 +18,7 @@ public class ShareService {
     public int getShareCount(int postId) {
         return dao.getShareCount(postId);
     }
+    public ShareService(ShareDAO dao) {
+        this.dao = dao;
+    }
 }

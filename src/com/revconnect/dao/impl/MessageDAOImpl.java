@@ -7,141 +7,118 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.revconnect.dao.MessageDAO;
-import com.revconnect.db.DBConnection;
 import com.revconnect.model.Message;
 
 public class MessageDAOImpl implements MessageDAO {
 
+    // SEND MESSAGE
     @Override
-    public boolean sendMessage(Message message) {
-
-        Connection con = null;
-        PreparedStatement ps = null;
-
+    public boolean sendMessage(Connection con, int senderId, int receiverId, String content) {
         try {
-            con = DBConnection.getConnection();
-
             String sql =
-                "INSERT INTO MESSAGES (SENDER_ID, RECEIVER_ID, CONTENT) " +
-                "VALUES (?, ?, ?)";
+                "INSERT INTO MESSAGES (SENDER_ID, RECEIVER_ID, CONTENT, CREATED_AT, IS_READ) " +
+                "VALUES (?, ?, ?, SYSTIMESTAMP, 'N')";
 
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, message.getSenderId());
-            ps.setInt(2, message.getReceiverId());
-            ps.setString(3, message.getContent());
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, senderId);
+            ps.setInt(2, receiverId);
+            ps.setString(3, content);
 
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
-
         return false;
     }
 
+    // INBOX
     @Override
-    public List<Message> getInbox(int userId) {
+    public List<Message> getInbox(Connection con, int userId) {
 
-        List<Message> messages = new ArrayList<Message>();
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        List<Message> list = new ArrayList<Message>();
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
-                "SELECT m.MSG_ID, m.SENDER_ID, m.CONTENT, m.SENT_AT, u.USERNAME " +
-                "FROM MESSAGES m " +
-                "JOIN USERS u ON m.SENDER_ID = u.USER_ID " +
-                "WHERE m.RECEIVER_ID = ? " +
-                "ORDER BY m.SENT_AT DESC";
+                "SELECT MESSAGE_ID, SENDER_ID, RECEIVER_ID, CONTENT, CREATED_AT " +
+                "FROM MESSAGES " +
+                "WHERE RECEIVER_ID = ? " +
+                "ORDER BY CREATED_AT DESC";
 
-            ps = con.prepareStatement(sql);
+            PreparedStatement ps = con.prepareStatement(sql);
             ps.setInt(1, userId);
-            rs = ps.executeQuery();
+
+            ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                Message msg = new Message();
-                msg.setMsgId(rs.getInt("MSG_ID"));
-                msg.setSenderId(rs.getInt("SENDER_ID"));
-                msg.setContent(rs.getString("CONTENT"));
-                msg.setSentAt(rs.getTimestamp("SENT_AT"));
-
-                messages.add(msg);
+                Message m = new Message();
+                m.setMessageId(rs.getInt("MESSAGE_ID"));
+                m.setSenderId(rs.getInt("SENDER_ID"));
+                m.setReceiverId(rs.getInt("RECEIVER_ID"));
+                m.setContent(rs.getString("CONTENT"));
+                m.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                list.add(m);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
 
-        return messages;
+        return list;
     }
 
+    // CONVERSATION
     @Override
-    public List<Message> getConversation(int user1Id, int user2Id) {
+    public List<Message> getConversation(Connection con, int user1, int user2) {
 
-        List<Message> messages = new ArrayList<Message>();
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        List<Message> list = new ArrayList<Message>();
 
         try {
-            con = DBConnection.getConnection();
-
             String sql =
-                "SELECT MSG_ID, SENDER_ID, RECEIVER_ID, CONTENT, SENT_AT " +
+                "SELECT MESSAGE_ID, SENDER_ID, RECEIVER_ID, CONTENT, CREATED_AT " +
                 "FROM MESSAGES " +
                 "WHERE (SENDER_ID = ? AND RECEIVER_ID = ?) " +
                 "   OR (SENDER_ID = ? AND RECEIVER_ID = ?) " +
-                "ORDER BY SENT_AT";
+                "ORDER BY CREATED_AT";
 
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, user1Id);
-            ps.setInt(2, user2Id);
-            ps.setInt(3, user2Id);
-            ps.setInt(4, user1Id);
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, user1);
+            ps.setInt(2, user2);
+            ps.setInt(3, user2);
+            ps.setInt(4, user1);
 
-            rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                Message msg = new Message();
-                msg.setMsgId(rs.getInt("MSG_ID"));
-                msg.setSenderId(rs.getInt("SENDER_ID"));
-                msg.setReceiverId(rs.getInt("RECEIVER_ID"));
-                msg.setContent(rs.getString("CONTENT"));
-                msg.setSentAt(rs.getTimestamp("SENT_AT"));
-
-                messages.add(msg);
+                Message m = new Message();
+                m.setMessageId(rs.getInt("MESSAGE_ID"));
+                m.setSenderId(rs.getInt("SENDER_ID"));
+                m.setReceiverId(rs.getInt("RECEIVER_ID"));
+                m.setContent(rs.getString("CONTENT"));
+                m.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                list.add(m);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
 
-        return messages;
+        return list;
+    }
+
+    // MARK READ
+    @Override
+    public void markRead(Connection con, int userId) {
+        try {
+            String sql =
+                "UPDATE MESSAGES SET IS_READ = 'Y' WHERE RECEIVER_ID = ?";
+
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, userId);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

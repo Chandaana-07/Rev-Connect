@@ -1,5 +1,5 @@
 package com.revconnect.dao.impl;
-
+import java.sql.PreparedStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,38 +13,44 @@ import com.revconnect.model.UserConnection;
 public class ConnectionDAOImpl implements ConnectionDAO {
 
     // ---------------- SEND REQUEST ----------------
-    @Override
-    public boolean sendRequest(int senderId, int receiverId) {
+   
+	@Override
+	public boolean sendRequest(int senderId, int receiverId, 
+	                           String senderName, String receiverName) {
 
-        Connection con = null;
-        PreparedStatement ps = null;
+	    Connection con = null;
+	    PreparedStatement ps = null;
 
-        try {
-            con = DBConnection.getConnection();
+	    try {
+	        con = DBConnection.getConnection();
 
-            String sql =
-                "INSERT INTO CONNECTIONS (SENDER_ID, RECEIVER_ID, STATUS) " +
-                "VALUES (?, ?, 'PENDING')";
+	        String sql =
+	            "INSERT INTO CONNECTIONS " +
+	            "(SENDER_ID, RECEIVER_ID, SENDER_NAME, RECEIVER_NAME, STATUS, CREATED_AT) " +
+	            "VALUES (?, ?, ?, ?, 'PENDING', SYSTIMESTAMP)";
 
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, senderId);
-            ps.setInt(2, receiverId);
+	        ps = con.prepareStatement(sql);
 
-            return ps.executeUpdate() > 0;
+	        ps.setInt(1, senderId);          // logged-in user's ID
+	        ps.setInt(2, receiverId);       // target user's ID
+	        ps.setString(3, senderName);    // logged-in user's username
+	        ps.setString(4, receiverName);  // target user's username
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+	        return ps.executeUpdate() > 0;
 
-        return false;
-    }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (ps != null) ps.close();
+	            if (con != null) con.close();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
+	    return false;
+	}
+
 
     // ---------------- ACCEPT REQUEST ----------------
     @Override
@@ -129,7 +135,7 @@ public class ConnectionDAOImpl implements ConnectionDAO {
     @Override
     public List<UserConnection> getPendingRequests(int userId) {
 
-        List<UserConnection> list = new ArrayList<UserConnection>();
+        List<UserConnection> list = new ArrayList <UserConnection>();
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -138,9 +144,11 @@ public class ConnectionDAOImpl implements ConnectionDAO {
             con = DBConnection.getConnection();
 
             String sql =
-                "SELECT CONNECTION_ID, SENDER_ID, RECEIVER_ID, STATUS, CREATED_AT " +
+                "SELECT CONNECTION_ID, SENDER_ID, SENDER_NAME, RECEIVER_ID, STATUS, CREATED_AT " +
                 "FROM CONNECTIONS " +
-                "WHERE RECEIVER_ID = ? AND STATUS = 'PENDING'";
+                "WHERE RECEIVER_ID = ? " +
+                "AND STATUS = 'PENDING' " +
+                "ORDER BY CREATED_AT DESC";
 
             ps = con.prepareStatement(sql);
             ps.setInt(1, userId);
@@ -151,6 +159,7 @@ public class ConnectionDAOImpl implements ConnectionDAO {
                 UserConnection c = new UserConnection();
                 c.setConnectionId(rs.getInt("CONNECTION_ID"));
                 c.setSenderId(rs.getInt("SENDER_ID"));
+                c.setSenderName(rs.getString("SENDER_NAME")); // IMPORTANT
                 c.setReceiverId(rs.getInt("RECEIVER_ID"));
                 c.setStatus(rs.getString("STATUS"));
                 c.setCreatedAt(rs.getTimestamp("CREATED_AT"));
@@ -172,6 +181,7 @@ public class ConnectionDAOImpl implements ConnectionDAO {
 
         return list;
     }
+
     @Override
     public boolean removeConnection(int connectionId, int userId) {
 

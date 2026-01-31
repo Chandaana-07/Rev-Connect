@@ -20,8 +20,11 @@ import com.revconnect.service.PostService;
 import com.revconnect.service.ShareService;
 import com.revconnect.service.UserService;
 import com.revconnect.service.PinnedPostService;
+import com.revconnect.model.UserConnection;
+
 
 public class UserMenu {
+	private String senderName;
 
     private User loggedInUser;
     private Scanner sc = new Scanner(System.in);
@@ -796,73 +799,142 @@ public class UserMenu {
 
             switch (choice) {
 
-                case 1:
-                    System.out.print("Enter Username to send request: ");
-                    String targetUsername = sc.nextLine().trim();
+            case 1: {
+                System.out.print("Enter Username to send request: ");
+                String targetUsername = sc.nextLine().trim();
 
-                    targetId = userService.getUserIdByUsername(targetUsername);
+                User receiver = userService.getUserByUsername(targetUsername);
 
-                    if (targetId == -1) {
-                        System.out.println("User not found.");
-                        break;
-                    }
-
-                    connectionService.sendRequest(
-                            loggedInUser.getUserId(), targetId);
+                if (receiver == null) {
+                    System.out.println("User not found.");
                     break;
+                }
 
-                case 2:
-                    System.out.println("\n--- Pending Requests ---");
-                    for (com.revconnect.model.UserConnection c :
-                            connectionService.getPending(loggedInUser.getUserId())) {
-                        System.out.println("From User ID: " + c.getSenderId());
-                    }
-                    break;
+                int senderId = loggedInUser.getUserId();
+                String senderName = loggedInUser.getUsername();
 
-                case 3:
-                    System.out.print("Enter User ID to accept: ");
-                    targetId = readInt();
-                    connectionService.acceptRequest(
-                            targetId, loggedInUser.getUserId());
-                    break;
+                int receiverId = receiver.getUserId();
+                String receiverName = receiver.getUsername();
 
-                case 4:
-                    System.out.print("Enter User ID to reject: ");
-                    targetId = readInt();
-                    connectionService.rejectRequest(
-                            targetId, loggedInUser.getUserId());
-                    break;
+                boolean success = connectionService.sendRequest(
+                    senderId,
+                    receiverId,
+                    senderName,
+                    receiverName
+                );
 
-                case 5:
-                    System.out.println("\n--- My Connections ---");
-                    for (com.revconnect.model.UserConnection c :
-                            connectionService.getConnections(loggedInUser.getUserId())) {
-
-                        int connectedUser =
-                                (c.getSenderId() == loggedInUser.getUserId())
-                                        ? c.getReceiverId()
-                                        : c.getSenderId();
-
-                        System.out.println("Connected with User ID: " + connectedUser);
-                    }
-                    break;
-
-                case 6:
-                    System.out.print("Enter User ID to remove: ");
-                    targetId = readInt();
-                    connectionService.removeConnection(
-                            loggedInUser.getUserId(), targetId);
-                    break;
-
-                case 7:
-                    return;
-
-                default:
-                    System.out.println("Invalid choice");
+                System.out.println(success
+                    ? "Connection request sent!"
+                    : "Failed to send request.");
+                break;
             }
+
+            case 2: {
+                System.out.println("\n--- Pending Requests ---");
+
+                int loggedInUserId = loggedInUser.getUserId();
+
+                List<UserConnection> pending =
+                    connectionService.getPendingRequests(loggedInUserId);
+
+                if (pending == null || pending.isEmpty()) {
+                    System.out.println("No pending requests.");
+                } else {
+                    System.out.printf("%-5s %-15s %-25s%n", "ID", "Sender", "Date");
+                    System.out.println("-----------------------------------------------");
+
+                    for (UserConnection c : pending) {
+                        System.out.printf(
+                            "%-5d %-15s %-25s%n",
+                            c.getConnectionId(),
+                            c.getSenderName(),
+                            String.valueOf(c.getCreatedAt())
+                        );
+                    }
+                }
+                break;
+            }
+
+            case 3: {
+                System.out.println("\n--- Accept Request ---");
+
+                int receiverId = loggedInUser.getUserId();
+
+                System.out.print("Enter Connection ID to accept: ");
+                int connectionId = Integer.parseInt(sc.nextLine().trim());
+
+                boolean accepted = connectionService.acceptRequest(
+                    connectionId,
+                    receiverId
+                );
+
+                System.out.println(accepted
+                    ? "Request accepted!"
+                    : "Request not found or already processed.");
+                break;
+            }
+
+            case 4: {
+                System.out.println("\n--- Reject Request ---");
+
+                int receiverId = loggedInUser.getUserId();
+
+                System.out.print("Enter Connection ID to reject: ");
+                int connectionId = Integer.parseInt(sc.nextLine().trim());
+
+                boolean rejected = connectionService.rejectRequest(
+                    connectionId,
+                    receiverId
+                );
+
+                System.out.println(rejected
+                    ? "Request rejected!"
+                    : "Request not found or already processed.");
+                break;
+            }
+
+            case 5: {
+                System.out.println("\n--- My Connections ---");
+
+                for (UserConnection c :
+                        connectionService.getConnections(loggedInUser.getUserId())) {
+
+                    int connectedUser =
+                        (c.getSenderId() == loggedInUser.getUserId())
+                            ? c.getReceiverId()
+                            : c.getSenderId();
+
+                    System.out.println("Connected with User ID: " + connectedUser);
+                }
+                break;
+            }
+
+            case 6: {
+                System.out.println("\n--- Remove Connection ---");
+
+                System.out.print("Enter Connection ID to remove: ");
+                int connectionId = Integer.parseInt(sc.nextLine().trim());
+
+                boolean removed = connectionService.removeConnection(
+                    connectionId,
+                    loggedInUser.getUserId()
+                );
+
+                System.out.println(removed
+                    ? "Connection removed!"
+                    : "Connection not found or not accepted.");
+                break;
+            }
+
+            case 7:
+                return;
+
+            default:
+                System.out.println("Invalid choice");
+        }
+        
         }
     }
-
     // ===================== FOLLOW =====================
     private void followMenu() {
 
@@ -927,6 +999,83 @@ public class UserMenu {
 
     // ===================== MESSAGES =====================
     private void messagesMenu() {
-        System.out.println("Messages menu working");
+
+        while (true) {
+            System.out.println("\n--- Messages ---");
+            System.out.println("1. Send Message");
+            System.out.println("2. View Inbox");
+            System.out.println("3. Back");
+
+            System.out.print("Choose: ");
+            int choice = readInt();
+
+            switch (choice) {
+
+                case 1:
+                    System.out.print("Enter username to send message: ");
+                    String target = sc.nextLine().trim();
+
+                    User receiver =
+                        userService.getUserByUsername(target);
+
+                    if (receiver == null) {
+                        System.out.println("User not found.");
+                        break;
+                    }
+
+                    System.out.print("Enter message: ");
+                    String content = sc.nextLine();
+
+                    boolean sent =
+                        messageService.sendMessage(
+                            loggedInUser.getUserId(),
+                            receiver.getUserId(),
+                            content
+                        );
+
+                    System.out.println(sent
+                        ? "Message sent!"
+                        : "Failed to send message.");
+                    break;
+
+                case 2:
+                    System.out.println("\n--- Inbox ---");
+
+                    List<com.revconnect.model.Message> inbox =
+                        messageService.getInbox(
+                            loggedInUser.getUserId()
+                        );
+
+                    if (inbox == null || inbox.isEmpty()) {
+                        System.out.println("No messages.");
+                    } else {
+                        for (com.revconnect.model.Message m : inbox) {
+                            System.out.println(
+                                "From User ID: " +
+                                m.getSenderId() +
+                                " | " +
+                                m.getContent() +
+                                " (" + m.getCreatedAt() + ")"
+                            );
+                        }
+                    }
+                    break;
+
+                case 3:
+                    return;
+
+                default:
+                    System.out.println("Invalid choice");
+            }
+        }
     }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
 }

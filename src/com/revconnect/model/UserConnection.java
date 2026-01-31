@@ -62,4 +62,14 @@ public class UserConnection {
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
+    private String senderName;
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
 }
