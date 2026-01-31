@@ -55,7 +55,7 @@ public class PostService {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(con);
+          
         }
         return new ArrayList<Post>();
     }
