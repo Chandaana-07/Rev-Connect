@@ -6,13 +6,13 @@ import com.revconnect.model.Comment;
 import com.revconnect.dao.CommentDAO;
 import com.revconnect.dao.impl.CommentDAOImpl;
 
-
 public class CommentService {
 
-	 private CommentDAO dao = new CommentDAOImpl();
 	 private NotificationService notificationService = new NotificationService();
 	 private PostService postService = new PostService();
 	 private UserService userService = new UserService();
+	 private CommentDAO dao;
+	
 
 
    
@@ -23,7 +23,7 @@ public class CommentService {
 		    if (success) {
 		        int ownerId = postService.getPostOwner(c.getPostId());
 
-		        // prevent notifying yourself
+		        
 		        if (ownerId != c.getUserId()) {
 		            String username = userService.getUsernameById(c.getUserId());
 
@@ -50,5 +50,12 @@ public class CommentService {
     public boolean deleteComment(int commentId, int userId) {
         return dao.deleteComment(commentId, userId);
     }
+ 
+    public CommentService() {
+        this.dao = new CommentDAOImpl();
+    }
+
+ 
+  
 
 }

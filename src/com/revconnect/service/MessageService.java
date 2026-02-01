@@ -9,11 +9,16 @@ import com.revconnect.db.DBConnection;
 import com.revconnect.model.Message;
 import com.revconnect.service.NotificationService;
 import com.revconnect.service.UserService;
+import com.revconnect.db.ConnectionProvider;
+import com.revconnect.db.DefaultConnectionProvider;
+
 
 
 public class MessageService {
+	private MessageDAO dao;
+	private ConnectionProvider connectionProvider;
 
-    private MessageDAO dao = new MessageDAOImpl();
+
     private NotificationService notificationService = new NotificationService();
     private UserService userService = new UserService();
 
@@ -21,7 +26,7 @@ public class MessageService {
     // SEND MESSAGE
     public boolean send(Message m) {
         try {
-            Connection con = DBConnection.getConnection();
+            Connection con = connectionProvider.getConnection();
             return dao.sendMessage(
                 con,
                 m.getSenderId(),
@@ -37,7 +42,7 @@ public class MessageService {
     // GET CONVERSATION
     public List<Message> getConversation(int user1, int user2) {
         try {
-            Connection con = DBConnection.getConnection();
+            Connection con = connectionProvider.getConnection();
             return dao.getConversation(con, user1, user2);
         } catch (Exception e) {
             e.printStackTrace();
@@ -48,7 +53,7 @@ public class MessageService {
     // MARK READ
     public void markRead(int userId) {
         try {
-            Connection con = DBConnection.getConnection();
+            Connection con = connectionProvider.getConnection();
             dao.markRead(con, userId);
         } catch (Exception e) {
             e.printStackTrace();
@@ -58,7 +63,7 @@ public class MessageService {
     // INBOX
     public List<Message> getInbox(int userId) {
         try {
-            Connection con = DBConnection.getConnection();
+            Connection con = connectionProvider.getConnection();
             return dao.getInbox(con, userId);
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,6 +86,18 @@ public class MessageService {
 
         return success;
     }
+ 
+    public MessageService() {
+        this.dao = new MessageDAOImpl();
+        this.connectionProvider = new DefaultConnectionProvider();
+    }
+
+   
+    public MessageService(MessageDAO dao, ConnectionProvider provider) {
+        this.dao = dao;
+        this.connectionProvider = provider;
+    }
+
 
   
     

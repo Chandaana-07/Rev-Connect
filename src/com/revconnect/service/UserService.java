@@ -4,6 +4,9 @@ import com.revconnect.dao.UserDAO;
 import com.revconnect.dao.impl.UserDAOImpl;
 import com.revconnect.db.DBConnection;
 import com.revconnect.model.User;
+import com.revconnect.db.ConnectionProvider;
+import com.revconnect.db.DefaultConnectionProvider;
+
 
 import java.sql.Connection;
 import java.util.List;
@@ -11,9 +14,12 @@ import java.util.List;
 public class UserService {
 
     private UserDAO dao;
+    private ConnectionProvider connectionProvider;
+
 
     public UserService() {
         dao = new UserDAOImpl();
+        connectionProvider = new com.revconnect.db.DefaultConnectionProvider();
     }
 
     // For Mockito / Testing
@@ -26,7 +32,7 @@ public class UserService {
 
         Connection con = null;
         try {
-            con = DBConnection.getConnection();
+            con = connectionProvider.getConnection();
 
             if (con == null) {
                 System.out.println("Database is currently unavailable.");
@@ -45,7 +51,7 @@ public class UserService {
 
         Connection con = null;
         try {
-            con = DBConnection.getConnection();
+            con = connectionProvider.getConnection();
 
             if (con == null) {
                 System.out.println("Database is currently unavailable.");
@@ -64,7 +70,7 @@ public class UserService {
 
         Connection con = null;
         try {
-            con = DBConnection.getConnection();
+            con = connectionProvider.getConnection();
 
             if (con == null) {
                 System.out.println("Database is currently unavailable.");
@@ -83,7 +89,7 @@ public class UserService {
 
         Connection con = null;
         try {
-            con = DBConnection.getConnection();
+            con = connectionProvider.getConnection();
 
             if (con == null) {
                 System.out.println("Database is currently unavailable.");
@@ -101,7 +107,7 @@ public class UserService {
 
         Connection con = null;
         try {
-            con = DBConnection.getConnection();
+            con = connectionProvider.getConnection();
 
             if (con == null) {
                 System.out.println("Database is currently unavailable.");
@@ -120,7 +126,7 @@ public class UserService {
 
         Connection con = null;
         try {
-            con = DBConnection.getConnection();
+            con = connectionProvider.getConnection();
 
             if (con == null) {
                 System.out.println("Database is currently unavailable.");
@@ -138,7 +144,7 @@ public class UserService {
 
         Connection con = null;
         try {
-            con = DBConnection.getConnection();
+            con = connectionProvider.getConnection();
 
             if (con == null) {
                 System.out.println("Database is currently unavailable.");
@@ -157,7 +163,7 @@ public class UserService {
 
         Connection con = null;
         try {
-            con = DBConnection.getConnection();
+            con = connectionProvider.getConnection();
 
             if (con == null) {
                 System.out.println("Database is currently unavailable.");
@@ -176,7 +182,7 @@ public class UserService {
 
         Connection con = null;
         try {
-            con = DBConnection.getConnection();
+            con = connectionProvider.getConnection();
 
             if (con == null) {
                 System.out.println("Database is currently unavailable.");
@@ -195,7 +201,7 @@ public class UserService {
 
         Connection con = null;
         try {
-            con = DBConnection.getConnection();
+            con = connectionProvider.getConnection();
 
             if (con == null) {
                 System.out.println("Database is currently unavailable.");
@@ -221,5 +227,11 @@ public class UserService {
         }
         return "user_" + userId; // fallback
     }
+ // For Mockito testing
+    public UserService(UserDAO dao, ConnectionProvider provider) {
+        this.dao = dao;
+        this.connectionProvider = provider;
+    }
+
 
 }

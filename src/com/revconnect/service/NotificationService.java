@@ -5,10 +5,12 @@ import java.util.List;
 import com.revconnect.dao.NotificationDAO;
 import com.revconnect.dao.impl.NotificationDAOImpl;
 import com.revconnect.model.Notification;
-
+import com.revconnect.db.ConnectionProvider;
+import com.revconnect.db.DefaultConnectionProvider;
 public class NotificationService {
 
-    private NotificationDAO dao = new NotificationDAOImpl();
+    private NotificationDAO dao;
+    private ConnectionProvider connectionProvider;
 
     // Create notification
     public void notifyUser(int userId, String message) {
@@ -29,15 +31,31 @@ public class NotificationService {
     }
 
     // Mark single as read
-    public void markRead(int notifId, int userId) {
-        dao.markAsRead(notifId, userId);
+    public boolean markAsRead(int notifId, int userId) {
+       return dao.markAsRead(notifId, userId);
     }
 
     // Mark all as read
     public void markAllRead(int userId) {
         List<Notification> list = getMyNotifications(userId);
         for (Notification n : list) {
-            dao.markAsRead(n.getNotificationId(), userId);
+            markAsRead(n.getNotificationId(), userId);
         }
     }
+ // Normal Constructor
+    public NotificationService() {
+        this.dao = new NotificationDAOImpl();
+        this.connectionProvider = new DefaultConnectionProvider();
+    }
+   // TEST CONSTRUCTOR (Mockito uses this)
+    public NotificationService(
+            NotificationDAO dao,
+            ConnectionProvider provider) {
+        this.dao = dao;
+        this.connectionProvider = provider;
+    }
+    public boolean createNotification(Notification n) {
+        return dao.createNotification(n);
+    }
+
 }

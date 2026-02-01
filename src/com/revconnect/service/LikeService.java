@@ -15,6 +15,14 @@ public class LikeService {
     private NotificationService notificationService = new NotificationService();
     private PostService postService = new PostService();
     private UserService userService = new UserService();
+    
+    public LikeService() {
+        this.dao = new LikeDAOImpl();
+        this.postService = new PostService();
+        this.userService = new UserService();
+        this.notificationService = new NotificationService();
+    }
+
 
     public void likePost(int userId, int postId) {
 
@@ -35,6 +43,12 @@ public class LikeService {
             }
         }
     }
+     // For Mockito testing
+        public LikeService(LikeDAO dao) {
+            this.dao = dao;
+        }
+
+    
 
     public int getLikeCount(int postId) {
         return dao.getLikeCount(postId);

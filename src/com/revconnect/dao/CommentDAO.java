@@ -5,10 +5,9 @@ import com.revconnect.model.Comment;
 
 public interface CommentDAO {
 
-    boolean addComment(Comment c);
+    boolean addComment(Comment comment);
 
     List<Comment> getCommentsByPost(int postId);
-    
-    boolean deleteComment(int commentId, int userId);
 
+    boolean deleteComment(int commentId, int userId);
 }

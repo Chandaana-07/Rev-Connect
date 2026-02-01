@@ -9,43 +9,56 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.revconnect.dao.ShareDAO;
+import com.revconnect.db.ConnectionProvider;
 
 public class ShareServiceTest {
 
     private ShareDAO shareDAO;
+    private ConnectionProvider connectionProvider;
+    private Connection connection;
+
     private ShareService shareService;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+
         shareDAO = mock(ShareDAO.class);
-        shareService = new ShareService(shareDAO);
+        connectionProvider = mock(ConnectionProvider.class);
+        connection = mock(Connection.class);
+
+        when(connectionProvider.getConnection())
+            .thenReturn(connection);
+
+        shareService = new ShareService(shareDAO, connectionProvider);
     }
 
     @Test
-    public void testSharePostSuccess() {
+    public void testSharePostSuccess() throws Exception {
 
-        when(shareDAO.sharePost(any(Connection.class), eq(10), eq(5)))
-                .thenReturn(true);
+        when(shareDAO.sharePost(connection, 10, 5))
+            .thenReturn(true);
 
-        boolean result = shareService.sharePost(10, 5);
+        boolean result =
+            shareService.sharePost(10, 5);
 
         assertTrue(result);
 
         verify(shareDAO, times(1))
-                .sharePost(any(Connection.class), eq(10), eq(5));
+            .sharePost(connection, 10, 5);
     }
 
     @Test
-    public void testGetShareCount() {
+    public void testGetShareCount() throws Exception {
 
-        when(shareDAO.getShareCount(any(Connection.class), eq(10)))
-                .thenReturn(3);
+        when(shareDAO.getShareCount(connection, 10))
+            .thenReturn(3);
 
-        int count = shareService.getShareCount(10);
+        int count =
+            shareService.getShareCount(10);
 
         assertEquals(3, count);
 
         verify(shareDAO, times(1))
-                .getShareCount(any(Connection.class), eq(10));
+            .getShareCount(connection, 10);
     }
 }
