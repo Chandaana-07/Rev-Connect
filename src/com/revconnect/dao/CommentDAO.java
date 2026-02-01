@@ -5,7 +5,7 @@ import com.revconnect.model.Comment;
 
 public interface CommentDAO {
 
-    boolean addComment(Comment comment);
+    boolean addComment(Comment c);
 
     List<Comment> getCommentsByPost(int postId);
     

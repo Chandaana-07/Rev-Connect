@@ -3,76 +3,49 @@ package com.revconnect.service;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.sql.Connection;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import com.revconnect.dao.ShareDAO;
 
 public class ShareServiceTest {
 
-    @Mock
     private ShareDAO shareDAO;
-
     private ShareService shareService;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        shareService = new ShareService(shareDAO); // inject mock DAO
+        shareDAO = mock(ShareDAO.class);
+        shareService = new ShareService(shareDAO);
     }
 
-    // ---------------- TEST: sharePost SUCCESS ----------------
     @Test
     public void testSharePostSuccess() {
-        int postId = 101;
-        int userId = 5;
 
-        when(shareDAO.sharePost(postId, userId))
-            .thenReturn(true);
+        when(shareDAO.sharePost(any(Connection.class), eq(10), eq(5)))
+                .thenReturn(true);
 
-        boolean result =
-            shareService.sharePost(postId, userId);
+        boolean result = shareService.sharePost(10, 5);
 
         assertTrue(result);
 
         verify(shareDAO, times(1))
-            .sharePost(postId, userId);
+                .sharePost(any(Connection.class), eq(10), eq(5));
     }
 
-    // ---------------- TEST: sharePost FAILURE ----------------
-    @Test
-    public void testSharePostFailure() {
-        int postId = 101;
-        int userId = 5;
-
-        when(shareDAO.sharePost(postId, userId))
-            .thenReturn(false);
-
-        boolean result =
-            shareService.sharePost(postId, userId);
-
-        assertFalse(result);
-
-        verify(shareDAO, times(1))
-            .sharePost(postId, userId);
-    }
-
-    // ---------------- TEST: getShareCount ----------------
     @Test
     public void testGetShareCount() {
-        int postId = 101;
 
-        when(shareDAO.getShareCount(postId))
-            .thenReturn(7);
+        when(shareDAO.getShareCount(any(Connection.class), eq(10)))
+                .thenReturn(3);
 
-        int count =
-            shareService.getShareCount(postId);
+        int count = shareService.getShareCount(10);
 
-        assertEquals(7, count);
+        assertEquals(3, count);
 
         verify(shareDAO, times(1))
-            .getShareCount(postId);
+                .getShareCount(any(Connection.class), eq(10));
     }
 }

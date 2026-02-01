@@ -30,7 +30,7 @@ public class UserMenu {
     private Scanner sc = new Scanner(System.in);
 
     private PostService postService = new PostService();
-    private UserService userService = new UserService();
+    private UserService user = new UserService();
     private MessageService messageService = new MessageService();
     private CommentService commentService = new CommentService();
     private LikeService likeService = new LikeService();
@@ -621,7 +621,7 @@ public class UserMenu {
     // ===================== NOTIFICATIONS =====================
     private void viewNotifications() {
 
-        List<Notification> list = notificationService.getUserNotifications(
+        List<Notification> list = notificationService.getMyNotifications(
                 loggedInUser.getUserId()
         );
 
@@ -688,7 +688,11 @@ public class UserMenu {
                     c.setUserId(loggedInUser.getUserId());
                     c.setContent(content);
 
-                    commentService.addComment(c);
+                    boolean added = commentService.addComment(c);
+
+                    System.out.println(added
+                        ? "Comment added successfully!"
+                        : "Failed to add comment. Please try again.");
                     break;
 
                 case 4:
@@ -775,8 +779,25 @@ public class UserMenu {
             return;
         }
 
-        postService.sharePost(postId, targetUser);
-        System.out.println("Post shared successfully with " + targetUser);
+        // Get target user from DB
+        User receiver = user.getUserByUsername(targetUser);
+
+        if (receiver == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        // Save share in SHARES table
+        boolean shared = shareService.sharePost(
+            postId,
+            loggedInUser.getUserId()
+        );
+
+        if (shared) {
+            System.out.println("Post shared successfully with " + targetUser);
+        } else {
+            System.out.println("Failed to share post.");
+        }
     }
 
     // ===================== CONNECTIONS =====================
@@ -803,7 +824,7 @@ public class UserMenu {
                 System.out.print("Enter Username to send request: ");
                 String targetUsername = sc.nextLine().trim();
 
-                User receiver = userService.getUserByUsername(targetUsername);
+                User receiver = user.getUserByUsername(targetUsername);
 
                 if (receiver == null) {
                     System.out.println("User not found.");
@@ -958,35 +979,67 @@ public class UserMenu {
 
             switch (choice) {
 
-                case 1:
-                    System.out.print("Enter User ID to follow: ");
-                    targetId = readInt();
-                    connectionService.follow(
-                            loggedInUser.getUserId(), targetId);
-                    break;
+            case 1:
+                System.out.print("Enter User ID to follow: ");
+                int id = readInt();
 
-                case 2:
-                    System.out.print("Enter User ID to unfollow: ");
-                    targetId = readInt();
-                    connectionService.unfollow(
-                            loggedInUser.getUserId(), targetId);
-                    break;
+                boolean followed = connectionService.follow(loggedInUser.getUserId(), id);
 
-                case 3:
-                    System.out.println("\n--- My Followers ---");
-                    for (com.revconnect.model.UserConnection c :
-                            connectionService.getFollowers(loggedInUser.getUserId())) {
+                if (followed) {
+                    System.out.println("Followed user successfully!");
+                } else {
+                    System.out.println("You are already following this user or follow failed.");
+                }
+                break;
+
+            case 2:
+                System.out.print("Enter User ID to unfollow: ");
+                targetId = readInt();
+
+                boolean unfollowed = connectionService.unfollow(
+                        loggedInUser.getUserId(), targetId
+                );
+
+                if (unfollowed) {
+                    System.out.println("Unfollowed successfully!");
+                } else {
+                    System.out.println("You are not following this user or unfollow failed.");
+                }
+                break;
+
+
+            case 3:
+                System.out.println("\n--- My Followers ---");
+
+                List<com.revconnect.model.UserConnection> followers =
+                        connectionService.getFollowers(loggedInUser.getUserId());
+
+                if (followers == null || followers.isEmpty()) {
+                    System.out.println("You have no followers yet.");
+                } else {
+                    for (com.revconnect.model.UserConnection c : followers) {
                         System.out.println("Follower User ID: " + c.getSenderId());
                     }
-                    break;
+                }
+                break;
+                
+                
+         
+            case 4:
+                System.out.println("\n--- I Am Following ---");
 
-                case 4:
-                    System.out.println("\n--- I Am Following ---");
-                    for (com.revconnect.model.UserConnection c :
-                            connectionService.getFollowing(loggedInUser.getUserId())) {
+                List<com.revconnect.model.UserConnection> following =
+                        connectionService.getFollowing(loggedInUser.getUserId());
+
+                if (following == null || following.isEmpty()) {
+                    System.out.println("You are not following anyone yet.");
+                } else {
+                    for (com.revconnect.model.UserConnection c : following) {
                         System.out.println("Following User ID: " + c.getReceiverId());
                     }
-                    break;
+                }
+                break;
+
 
                 case 5:
                     return;
@@ -1016,7 +1069,7 @@ public class UserMenu {
                     String target = sc.nextLine().trim();
 
                     User receiver =
-                        userService.getUserByUsername(target);
+                        user.getUserByUsername(target);
 
                     if (receiver == null) {
                         System.out.println("User not found.");

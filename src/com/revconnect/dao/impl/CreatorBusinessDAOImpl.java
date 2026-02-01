@@ -10,13 +10,23 @@ import com.revconnect.model.CreatorBusinessProfile;
 
 public class CreatorBusinessDAOImpl implements CreatorBusinessDAO {
 
+    // ---------------- REGISTER PROFILE ----------------
     @Override
     public boolean registerProfile(CreatorBusinessProfile p) {
 
+        Connection con = null;
+        PreparedStatement ps = null;
+
         try {
-            Connection con = DBConnection.getConnection();
-            String sql = "INSERT INTO creator_business_profile VALUES (?,?,?,?,?,?,?,?,?,?,?)";
-            PreparedStatement ps = con.prepareStatement(sql);
+            con = DBConnection.getConnection();
+
+            String sql =
+                "INSERT INTO creator_business_profile " +
+                "(user_id, account_type, display_name, category, bio, address, " +
+                "contact_info, website, social_links, business_hours, external_links) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+
+            ps = con.prepareStatement(sql);
 
             ps.setInt(1, p.getUserId());
             ps.setString(2, p.getAccountType());
@@ -34,21 +44,29 @@ public class CreatorBusinessDAOImpl implements CreatorBusinessDAO {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+        } finally {
+            close(null, ps, con);
         }
+        return false;
     }
 
+    // ---------------- UPDATE PROFILE ----------------
     @Override
     public boolean updateProfile(CreatorBusinessProfile p) {
 
-        try {
-            Connection con = DBConnection.getConnection();
-            String sql = "UPDATE creator_business_profile SET " +
-                    "display_name=?, category=?, bio=?, address=?, contact_info=?, " +
-                    "website=?, social_links=?, business_hours=?, external_links=? " +
-                    "WHERE user_id=?";
+        Connection con = null;
+        PreparedStatement ps = null;
 
-            PreparedStatement ps = con.prepareStatement(sql);
+        try {
+            con = DBConnection.getConnection();
+
+            String sql =
+                "UPDATE creator_business_profile SET " +
+                "display_name=?, category=?, bio=?, address=?, contact_info=?, " +
+                "website=?, social_links=?, business_hours=?, external_links=? " +
+                "WHERE user_id=?";
+
+            ps = con.prepareStatement(sql);
 
             ps.setString(1, p.getDisplayName());
             ps.setString(2, p.getCategory());
@@ -65,40 +83,61 @@ public class CreatorBusinessDAOImpl implements CreatorBusinessDAO {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+        } finally {
+            close(null, ps, con);
         }
+        return false;
     }
 
+    // ---------------- GET PROFILE ----------------
     @Override
     public CreatorBusinessProfile getProfile(int userId) {
 
-        try {
-            Connection con = DBConnection.getConnection();
-            String sql = "SELECT * FROM creator_business_profile WHERE user_id=?";
-            PreparedStatement ps = con.prepareStatement(sql);
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
+        try {
+            con = DBConnection.getConnection();
+
+            String sql =
+                "SELECT user_id, account_type, display_name, category, bio, address, " +
+                "contact_info, website, social_links, business_hours, external_links " +
+                "FROM creator_business_profile WHERE user_id=?";
+
+            ps = con.prepareStatement(sql);
             ps.setInt(1, userId);
-            ResultSet rs = ps.executeQuery();
+
+            rs = ps.executeQuery();
 
             if (rs.next()) {
                 CreatorBusinessProfile p = new CreatorBusinessProfile();
-                p.setUserId(rs.getInt(1));
-                p.setAccountType(rs.getString(2));
-                p.setDisplayName(rs.getString(3));
-                p.setCategory(rs.getString(4));
-                p.setBio(rs.getString(5));
-                p.setAddress(rs.getString(6));
-                p.setContactInfo(rs.getString(7));
-                p.setWebsite(rs.getString(8));
-                p.setSocialLinks(rs.getString(9));
-                p.setBusinessHours(rs.getString(10));
-                p.setExternalLinks(rs.getString(11));
+                p.setUserId(rs.getInt("USER_ID"));
+                p.setAccountType(rs.getString("ACCOUNT_TYPE"));
+                p.setDisplayName(rs.getString("DISPLAY_NAME"));
+                p.setCategory(rs.getString("CATEGORY"));
+                p.setBio(rs.getString("BIO"));
+                p.setAddress(rs.getString("ADDRESS"));
+                p.setContactInfo(rs.getString("CONTACT_INFO"));
+                p.setWebsite(rs.getString("WEBSITE"));
+                p.setSocialLinks(rs.getString("SOCIAL_LINKS"));
+                p.setBusinessHours(rs.getString("BUSINESS_HOURS"));
+                p.setExternalLinks(rs.getString("EXTERNAL_LINKS"));
                 return p;
             }
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            close(rs, ps, con);
         }
         return null;
+    }
+
+    // ---------------- UTILITY ----------------
+    private void close(ResultSet rs, PreparedStatement ps, Connection con) {
+        try { if (rs != null) rs.close(); } catch (Exception e) {}
+        try { if (ps != null) ps.close(); } catch (Exception e) {}
+        try { if (con != null) con.close(); } catch (Exception e) {}
     }
 }

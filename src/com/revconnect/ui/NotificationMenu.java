@@ -43,7 +43,7 @@ public class NotificationMenu {
 
     private void view() {
         for (Notification n :
-                service.getUserNotifications(user.getUserId())) {
+                service.getMyNotifications(user.getUserId())) {
             System.out.println(n);
         }
     }

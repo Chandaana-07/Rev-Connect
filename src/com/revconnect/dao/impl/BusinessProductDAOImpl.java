@@ -12,18 +12,22 @@ import com.revconnect.model.BusinessProduct;
 
 public class BusinessProductDAOImpl implements BusinessProductDAO {
 
+    // ---------------- ADD PRODUCT ----------------
     @Override
     public boolean addProduct(BusinessProduct p) {
 
+        Connection con = null;
+        PreparedStatement ps = null;
+
         try {
-            Connection con = DBConnection.getConnection();
+            con = DBConnection.getConnection();
 
-            String sql = "INSERT INTO business_products " +
-                         "(user_id, name, description, price, link) " +
-                         "VALUES (?, ?, ?, ?, ?)";
+            String sql =
+                "INSERT INTO business_products " +
+                "(user_id, name, description, price, link) " +
+                "VALUES (?, ?, ?, ?, ?)";
 
-            PreparedStatement ps = con.prepareStatement(sql);
-
+            ps = con.prepareStatement(sql);
             ps.setInt(1, p.getUserId());
             ps.setString(2, p.getName());
             ps.setString(3, p.getDescription());
@@ -34,41 +38,59 @@ public class BusinessProductDAOImpl implements BusinessProductDAO {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+        } finally {
+            close(null, ps, con);
         }
+        return false;
     }
 
+    // ---------------- GET PRODUCTS BY USER ----------------
     @Override
     public List<BusinessProduct> getProductsByUser(int userId) {
 
         List<BusinessProduct> list = new ArrayList<BusinessProduct>();
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
         try {
-            Connection con = DBConnection.getConnection();
+            con = DBConnection.getConnection();
 
-            String sql = "SELECT * FROM business_products WHERE user_id = ?";
+            String sql =
+                "SELECT PRODUCT_ID, USER_ID, NAME, DESCRIPTION, PRICE, LINK " +
+                "FROM business_products " +
+                "WHERE user_id = ?";
 
-            PreparedStatement ps = con.prepareStatement(sql);
+            ps = con.prepareStatement(sql);
             ps.setInt(1, userId);
 
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
 
             while (rs.next()) {
                 BusinessProduct p = new BusinessProduct();
-                p.setProductId(rs.getInt(1));
-                p.setUserId(rs.getInt(2));
-                p.setName(rs.getString(3));
-                p.setDescription(rs.getString(4));
-                p.setPrice(rs.getString(5));
-                p.setLink(rs.getString(6));
+                p.setProductId(rs.getInt("PRODUCT_ID"));
+                p.setUserId(rs.getInt("USER_ID"));
+                p.setName(rs.getString("NAME"));
+                p.setDescription(rs.getString("DESCRIPTION"));
+                p.setPrice(rs.getString("PRICE"));
+                p.setLink(rs.getString("LINK"));
 
                 list.add(p);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            close(rs, ps, con);
         }
 
         return list;
+    }
+
+    // ---------------- UTILITY ----------------
+    private void close(ResultSet rs, PreparedStatement ps, Connection con) {
+        try { if (rs != null) rs.close(); } catch (Exception e) {}
+        try { if (ps != null) ps.close(); } catch (Exception e) {}
+        try { if (con != null) con.close(); } catch (Exception e) {}
     }
 }

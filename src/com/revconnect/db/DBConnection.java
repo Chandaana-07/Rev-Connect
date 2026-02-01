@@ -5,22 +5,18 @@ import java.sql.DriverManager;
 
 public class DBConnection {
 
-    private static Connection con;
+    // Oracle 10g XE uses SID, not service name
+    private static final String URL = "jdbc:oracle:thin:@127.0.0.1:1521:XE";
+    private static final String USER = "system";
+    private static final String PASSWORD = "chandana"; // MUST match sqlplus password
 
-    public static synchronized Connection getConnection() {
+    public static Connection getConnection() {
         try {
-            if (con == null || con.isClosed()) {
-                Class.forName("oracle.jdbc.driver.OracleDriver");
-
-                con = DriverManager.getConnection(
-                    DBConfiguration.URL,
-                    DBConfiguration.USER,
-                    DBConfiguration.PASS
-                );
-            }
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            return DriverManager.getConnection(URL, USER, PASSWORD);
         } catch (Exception e) {
-            System.out.println("Unable to connect to database.");
+            e.printStackTrace();
         }
-        return con;
+        return null;
     }
 }

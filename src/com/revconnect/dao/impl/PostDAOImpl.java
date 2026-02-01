@@ -7,17 +7,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.revconnect.dao.PostDAO;
+import com.revconnect.db.DBConnection;
 import com.revconnect.model.Post;
 
 public class PostDAOImpl implements PostDAO {
 
     // ---------------- CREATE ----------------
     @Override
-    public boolean createPost(Connection con, int userId, String postName, String content, String postType) {
+    public boolean createPost(Connection ignored, int userId, String postName, String content, String postType) {
 
+        Connection con = null;
         PreparedStatement ps = null;
 
         try {
+            con = DBConnection.getConnection();
+
             String sql =
                 "INSERT INTO POSTS (USER_ID, POST_NAME, CONTENT, POST_TYPE) " +
                 "VALUES (?, ?, ?, ?)";
@@ -35,7 +39,7 @@ public class PostDAOImpl implements PostDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(ps, null);
+            close(null, ps, con);
         }
 
         return false;
@@ -43,13 +47,16 @@ public class PostDAOImpl implements PostDAO {
 
     // ---------------- VIEW MY POSTS ----------------
     @Override
-    public List<Post> getPostsByUser(Connection con, int userId) {
+    public List<Post> getPostsByUser(Connection ignored, int userId) {
 
         List<Post> list = new ArrayList<Post>();
+        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
+            con = DBConnection.getConnection();
+
             String sql =
                 "SELECT p.POST_ID, p.POST_NAME, p.CONTENT, p.CREATED_AT, " +
                 "p.POST_TYPE, p.REACH, u.USERNAME " +
@@ -64,7 +71,7 @@ public class PostDAOImpl implements PostDAO {
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                Post p = new Post();  
+                Post p = new Post();
 
                 p.setPostId(rs.getInt("POST_ID"));
                 p.setPostName(rs.getString("POST_NAME"));
@@ -81,22 +88,24 @@ public class PostDAOImpl implements PostDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(ps, rs);
+            close(rs, ps, con);
         }
 
         return list;
     }
 
-
- // ---------------- GLOBAL FEED ----------------
+    // ---------------- GLOBAL FEED ----------------
     @Override
-    public List<Post> getAllPosts(Connection con) {
+    public List<Post> getAllPosts(Connection ignored) {
 
         List<Post> list = new ArrayList<Post>();
+        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
+            con = DBConnection.getConnection();
+
             String sql =
                 "SELECT p.POST_ID, p.USER_ID, p.POST_NAME, p.CONTENT, p.CREATED_AT, " +
                 "p.POST_TYPE, p.REACH, u.USERNAME " +
@@ -105,7 +114,6 @@ public class PostDAOImpl implements PostDAO {
                 "ORDER BY p.CREATED_AT DESC";
 
             ps = con.prepareStatement(sql);
-
             rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -117,7 +125,7 @@ public class PostDAOImpl implements PostDAO {
                 p.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                 p.setPostType(rs.getString("POST_TYPE"));
                 p.setReach(rs.getInt("REACH"));
-                p.setUsername(rs.getString("USERNAME")); // Optional but useful
+                p.setUsername(rs.getString("USERNAME"));
 
                 list.add(p);
             }
@@ -125,27 +133,28 @@ public class PostDAOImpl implements PostDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(ps, rs);
+            close(rs, ps, con);
         }
 
         return list;
     }
 
-
     // ---------------- CONNECTION FEED ----------------
     @Override
-    public List<Post> getFeedPosts(Connection con, int userId) {
-        // For now, same as global feed
-        return getAllPosts(con);
+    public List<Post> getFeedPosts(Connection ignored, int userId) {
+        return getAllPosts(null);
     }
 
     // ---------------- UPDATE ----------------
     @Override
-    public boolean updatePost(Connection con, int postId, int userId, String content) {
+    public boolean updatePost(Connection ignored, int postId, int userId, String content) {
 
+        Connection con = null;
         PreparedStatement ps = null;
 
         try {
+            con = DBConnection.getConnection();
+
             String sql =
                 "UPDATE POSTS SET CONTENT = ? " +
                 "WHERE POST_ID = ? AND USER_ID = ?";
@@ -160,7 +169,7 @@ public class PostDAOImpl implements PostDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(ps, null);
+            close(null, ps, con);
         }
 
         return false;
@@ -168,11 +177,14 @@ public class PostDAOImpl implements PostDAO {
 
     // ---------------- DELETE ----------------
     @Override
-    public boolean deletePost(Connection con, int postId, int userId) {
+    public boolean deletePost(Connection ignored, int postId, int userId) {
 
+        Connection con = null;
         PreparedStatement ps = null;
 
         try {
+            con = DBConnection.getConnection();
+
             String sql =
                 "DELETE FROM POSTS WHERE POST_ID = ? AND USER_ID = ?";
 
@@ -185,7 +197,7 @@ public class PostDAOImpl implements PostDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(ps, null);
+            close(null, ps, con);
         }
 
         return false;
@@ -193,12 +205,15 @@ public class PostDAOImpl implements PostDAO {
 
     // ---------------- GET POST ID BY NAME ----------------
     @Override
-    public int getPostIdByName(Connection con, String postName, int userId) {
+    public int getPostIdByName(Connection ignored, String postName, int userId) {
 
+        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
+            con = DBConnection.getConnection();
+
             String sql =
                 "SELECT POST_ID FROM POSTS " +
                 "WHERE POST_NAME = ? AND USER_ID = ?";
@@ -216,7 +231,7 @@ public class PostDAOImpl implements PostDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(ps, rs);
+            close(rs, ps, con);
         }
 
         return -1;
@@ -224,21 +239,29 @@ public class PostDAOImpl implements PostDAO {
 
     // ---------------- SEARCH BY HASHTAG ----------------
     @Override
-    public List<Post> searchByHashtag(Connection con, String tag) {
+    public List<Post> searchByHashtag(Connection ignored, String tag) {
 
         List<Post> list = new ArrayList<Post>();
+        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
+            con = DBConnection.getConnection();
+
             String sql =
-                "SELECT POST_ID, USER_ID, POST_NAME, CONTENT, CREATED_AT, POST_TYPE, REACH " +
-                "FROM POSTS " +
-                "WHERE CONTENT LIKE ? " +
-                "ORDER BY CREATED_AT DESC";
+                "SELECT p.POST_ID, p.USER_ID, p.POST_NAME, p.CONTENT, p.CREATED_AT, " +
+                "p.POST_TYPE, p.REACH, u.USERNAME " +
+                "FROM POSTS p " +
+                "JOIN USERS u ON p.USER_ID = u.USER_ID " +
+                "WHERE LOWER(p.POST_NAME) LIKE ? OR LOWER(p.CONTENT) LIKE ? " +
+                "ORDER BY p.CREATED_AT DESC";
 
             ps = con.prepareStatement(sql);
-            ps.setString(1, "%" + tag + "%");
+
+            String search = "%" + tag.toLowerCase() + "%";
+            ps.setString(1, search);
+            ps.setString(2, search);
 
             rs = ps.executeQuery();
 
@@ -251,6 +274,7 @@ public class PostDAOImpl implements PostDAO {
                 p.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                 p.setPostType(rs.getString("POST_TYPE"));
                 p.setReach(rs.getInt("REACH"));
+                p.setUsername(rs.getString("USERNAME"));
 
                 list.add(p);
             }
@@ -258,7 +282,7 @@ public class PostDAOImpl implements PostDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(ps, rs);
+            close(rs, ps, con);
         }
 
         return list;
@@ -266,13 +290,16 @@ public class PostDAOImpl implements PostDAO {
 
     // ---------------- TRENDING HASHTAGS ----------------
     @Override
-    public List<String> getTrendingHashtags(Connection con) {
+    public List<String> getTrendingHashtags(Connection ignored) {
 
         List<String> list = new ArrayList<String>();
+        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
+            con = DBConnection.getConnection();
+
             String sql =
                 "SELECT SUBSTR(CONTENT, INSTR(CONTENT, '#')) AS TAG " +
                 "FROM POSTS " +
@@ -288,7 +315,7 @@ public class PostDAOImpl implements PostDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(ps, rs);
+            close(rs, ps, con);
         }
 
         return list;
@@ -296,12 +323,15 @@ public class PostDAOImpl implements PostDAO {
 
     // ---------------- POST BY ID ----------------
     @Override
-    public Post getPostById(Connection con, int postId) {
+    public Post getPostById(Connection ignored, int postId) {
 
+        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
+            con = DBConnection.getConnection();
+
             String sql =
                 "SELECT POST_ID, USER_ID, POST_NAME, CONTENT, CREATED_AT, POST_TYPE, REACH " +
                 "FROM POSTS WHERE POST_ID = ?";
@@ -326,19 +356,46 @@ public class PostDAOImpl implements PostDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(ps, rs);
+            close(rs, ps, con);
         }
 
         return null;
     }
 
     // ---------------- UTILITY ----------------
-    private void close(PreparedStatement ps, ResultSet rs) {
+    private void close(ResultSet rs, PreparedStatement ps, Connection con) {
+        try { if (rs != null) rs.close(); } catch (Exception e) {}
+        try { if (ps != null) ps.close(); } catch (Exception e) {}
+        try { if (con != null) con.close(); } catch (Exception e) {}
+    }
+    @Override
+    public int getPostOwner(Connection con, int postId) {
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
         try {
-            if (rs != null) rs.close();
-            if (ps != null) ps.close();
+            ps = con.prepareStatement(
+                "SELECT USER_ID FROM POSTS WHERE POST_ID = ?"
+            );
+            ps.setInt(1, postId);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("USER_ID");
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try { if (rs != null) rs.close(); } catch (Exception e) {}
+            try { if (ps != null) ps.close(); } catch (Exception e) {}
         }
+
+        return -1;
     }
+
+
+
 }

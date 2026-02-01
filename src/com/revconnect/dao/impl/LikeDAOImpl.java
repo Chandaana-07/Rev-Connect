@@ -9,44 +9,9 @@ import com.revconnect.db.DBConnection;
 
 public class LikeDAOImpl implements LikeDAO {
 
+    // ---------------- LIKE POST ----------------
     @Override
-    public boolean likePost(int postId, int userId) {
-
-        Connection con = null;
-        PreparedStatement ps = null;
-
-        try {
-            con = DBConnection.getConnection();
-
-            if (hasUserLiked(con, postId, userId)) {
-                return false;
-            }
-
-            String sql =
-                "INSERT INTO LIKES (POST_ID, USER_ID) VALUES (?, ?)";
-
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, postId);
-            ps.setInt(2, userId);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean unlikePost(int postId, int userId) {
+    public boolean likePost(int userId, int postId) {
 
         Connection con = null;
         PreparedStatement ps = null;
@@ -55,28 +20,50 @@ public class LikeDAOImpl implements LikeDAO {
             con = DBConnection.getConnection();
 
             String sql =
-                "DELETE FROM LIKES WHERE POST_ID = ? AND USER_ID = ?";
+                "INSERT INTO LIKES (USER_ID, POST_ID) VALUES (?, ?)";
 
             ps = con.prepareStatement(sql);
-            ps.setInt(1, postId);
-            ps.setInt(2, userId);
+            ps.setInt(1, userId);
+            ps.setInt(2, postId);
 
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(null, ps, con);
         }
-
         return false;
     }
 
+    // ---------------- UNLIKE POST ----------------
+    @Override
+    public boolean unlikePost(int userId, int postId) {
+
+        Connection con = null;
+        PreparedStatement ps = null;
+
+        try {
+            con = DBConnection.getConnection();
+
+            String sql =
+                "DELETE FROM LIKES WHERE USER_ID = ? AND POST_ID = ?";
+
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, userId);
+            ps.setInt(2, postId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(null, ps, con);
+        }
+        return false;
+    }
+
+    // ---------------- LIKE COUNT ----------------
     @Override
     public int getLikeCount(int postId) {
 
@@ -94,7 +81,6 @@ public class LikeDAOImpl implements LikeDAO {
             ps.setInt(1, postId);
 
             rs = ps.executeQuery();
-
             if (rs.next()) {
                 return rs.getInt(1);
             }
@@ -102,30 +88,28 @@ public class LikeDAOImpl implements LikeDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(rs, ps, con);
         }
-
         return 0;
     }
 
+    // ---------------- CHECK IF USER LIKED ----------------
     @Override
-    public boolean hasUserLiked(Connection con, int postId, int userId) {
+    public boolean hasUserLiked(int userId, int postId) {
 
+        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            String sql = "SELECT 1 FROM LIKES WHERE POST_ID = ? AND USER_ID = ?";
+            con = DBConnection.getConnection();
+
+            String sql =
+                "SELECT 1 FROM LIKES WHERE USER_ID = ? AND POST_ID = ?";
 
             ps = con.prepareStatement(sql);
-            ps.setInt(1, postId);
-            ps.setInt(2, userId);
+            ps.setInt(1, userId);
+            ps.setInt(2, postId);
 
             rs = ps.executeQuery();
             return rs.next();
@@ -133,16 +117,15 @@ public class LikeDAOImpl implements LikeDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(rs, ps, con);
         }
-
         return false;
     }
 
-
+    // ---------------- UTILITY ----------------
+    private void close(ResultSet rs, PreparedStatement ps, Connection con) {
+        try { if (rs != null) rs.close(); } catch (Exception e) {}
+        try { if (ps != null) ps.close(); } catch (Exception e) {}
+        try { if (con != null) con.close(); } catch (Exception e) {}
+    }
 }

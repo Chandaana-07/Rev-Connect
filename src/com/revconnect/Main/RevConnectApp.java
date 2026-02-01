@@ -1,14 +1,27 @@
-package com.revconnect.Main;
+package com.revconnect.main;
 
 import com.revconnect.ui.MainMenu;
-import com.revconnect.ui.AuthMenu;
-import com.revconnect.ui.BusinessMenu;
-
 
 public class RevConnectApp {
+
     public static void main(String[] args) {
-       
-        MainMenu menu = new MainMenu();
-        menu.showMenu();
+
+        try {
+            // 1. Test DB connection FIRST
+            java.sql.Connection con = com.revconnect.db.DBConnection.getConnection();
+
+            if (con != null && !con.isClosed()) {
+                System.out.println(" Database connected successfully!");
+                con.close();
+            }
+
+            // 2. Start Application Menu
+            MainMenu menu = new MainMenu();
+            menu.showMenu();
+
+        } catch (Exception e) {
+            System.out.println(" Error starting RevConnect:");
+            e.printStackTrace();
+        }
     }
 }

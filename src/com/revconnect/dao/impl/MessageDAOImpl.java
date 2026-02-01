@@ -11,15 +11,18 @@ import com.revconnect.model.Message;
 
 public class MessageDAOImpl implements MessageDAO {
 
-    // SEND MESSAGE
+    // ---------------- SEND MESSAGE ----------------
     @Override
     public boolean sendMessage(Connection con, int senderId, int receiverId, String content) {
+
+        PreparedStatement ps = null;
+
         try {
             String sql =
-                "INSERT INTO MESSAGES (SENDER_ID, RECEIVER_ID, CONTENT, CREATED_AT, IS_READ) " +
-                "VALUES (?, ?, ?, SYSTIMESTAMP, 'N')";
+                "INSERT INTO MESSAGES (SENDER_ID, RECEIVER_ID, CONTENT, CREATED_AT) " +
+                "VALUES (?, ?, ?, SYSTIMESTAMP)";
 
-            PreparedStatement ps = con.prepareStatement(sql);
+            ps = con.prepareStatement(sql);
             ps.setInt(1, senderId);
             ps.setInt(2, receiverId);
             ps.setString(3, content);
@@ -28,15 +31,24 @@ public class MessageDAOImpl implements MessageDAO {
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (ps != null) ps.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+
         return false;
     }
 
-    // INBOX
+    // ---------------- INBOX ----------------
     @Override
     public List<Message> getInbox(Connection con, int userId) {
 
         List<Message> list = new ArrayList<Message>();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
         try {
             String sql =
@@ -45,10 +57,10 @@ public class MessageDAOImpl implements MessageDAO {
                 "WHERE RECEIVER_ID = ? " +
                 "ORDER BY CREATED_AT DESC";
 
-            PreparedStatement ps = con.prepareStatement(sql);
+            ps = con.prepareStatement(sql);
             ps.setInt(1, userId);
 
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
 
             while (rs.next()) {
                 Message m = new Message();
@@ -62,16 +74,25 @@ public class MessageDAOImpl implements MessageDAO {
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         return list;
     }
 
-    // CONVERSATION
+    // ---------------- CONVERSATION ----------------
     @Override
     public List<Message> getConversation(Connection con, int user1, int user2) {
 
         List<Message> list = new ArrayList<Message>();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
         try {
             String sql =
@@ -81,13 +102,13 @@ public class MessageDAOImpl implements MessageDAO {
                 "   OR (SENDER_ID = ? AND RECEIVER_ID = ?) " +
                 "ORDER BY CREATED_AT";
 
-            PreparedStatement ps = con.prepareStatement(sql);
+            ps = con.prepareStatement(sql);
             ps.setInt(1, user1);
             ps.setInt(2, user2);
             ps.setInt(3, user2);
             ps.setInt(4, user1);
 
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
 
             while (rs.next()) {
                 Message m = new Message();
@@ -101,24 +122,21 @@ public class MessageDAOImpl implements MessageDAO {
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         return list;
     }
 
-    // MARK READ
+    // ---------------- MARK READ (DISABLED SAFELY) ----------------
     @Override
     public void markRead(Connection con, int userId) {
-        try {
-            String sql =
-                "UPDATE MESSAGES SET IS_READ = 'Y' WHERE RECEIVER_ID = ?";
-
-            PreparedStatement ps = con.prepareStatement(sql);
-            ps.setInt(1, userId);
-            ps.executeUpdate();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // Disabled because IS_READ column does not exist in Oracle 10g table
     }
 }

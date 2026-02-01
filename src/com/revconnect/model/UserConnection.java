@@ -11,7 +11,10 @@ public class UserConnection {
     private String status; // PENDING, ACCEPTED, FOLLOWING
     private Timestamp createdAt;
 
-    // ===== Default Constructor (REQUIRED by DAO) =====
+    private String senderName;
+    private String receiverName;
+
+    // ===== Default Constructor =====
     public UserConnection() {
     }
 
@@ -62,7 +65,6 @@ public class UserConnection {
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
-    private String senderName;
 
     public String getSenderName() {
         return senderName;
@@ -72,4 +74,11 @@ public class UserConnection {
         this.senderName = senderName;
     }
 
+    public String getReceiverName() {
+        return receiverName;
+    }
+
+    public void setReceiverName(String receiverName) {
+        this.receiverName = receiverName;
+    }
 }

@@ -10,29 +10,39 @@ import com.revconnect.dao.impl.CommentDAOImpl;
 public class CommentService {
 
 	 private CommentDAO dao = new CommentDAOImpl();
+	 private NotificationService notificationService = new NotificationService();
+	 private PostService postService = new PostService();
+	 private UserService userService = new UserService();
 
-    private static List<Comment> comments = new ArrayList<Comment>();
-    private static int idCounter = 1;
 
-    public void addComment(Comment c) {
-        c.setCommentId(idCounter++);
-        boolean comment = dao.addComment(c);
-        
-        if(comment){
-        	System.out.println("Comment added");
-        }
-        else{
-        	System.out.println("Comment not2 added");
-        }
-    }
+   
+	 public boolean addComment(Comment c) {
+
+		    boolean success = dao.addComment(c);
+
+		    if (success) {
+		        int ownerId = postService.getPostOwner(c.getPostId());
+
+		        // prevent notifying yourself
+		        if (ownerId != c.getUserId()) {
+		            String username = userService.getUsernameById(c.getUserId());
+
+		            notificationService.notifyUser(
+		                ownerId,
+		                "@" + username + " commented on your post: \"" + c.getContent() + "\""
+		            );
+		        }
+		    }
+
+		    return success;
+		}
+
+
 
     public List<Comment> getCommentsByPost(int postId) {
-        List<Comment> list = new ArrayList<Comment>();
-        for (Comment c : comments) {
-            if (c.getPostId() == postId) list.add(c);
-        }
-        return list;
+        return dao.getCommentsByPost(postId);
     }
+
 
     public void respondToComment(int commentId, String reply) {
         System.out.println("Reply to comment " + commentId + ": " + reply);

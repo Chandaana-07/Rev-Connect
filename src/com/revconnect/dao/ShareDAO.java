@@ -1,8 +1,9 @@
 package com.revconnect.dao;
+import java.sql.Connection;
 
 public interface ShareDAO {
 
-    boolean sharePost(int postId, int userId);
+    boolean sharePost(Connection con,int postId, int userId);
 
-    int getShareCount(int postId);
+    int getShareCount(Connection con,int postId);
 }

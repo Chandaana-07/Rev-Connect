@@ -3,231 +3,207 @@ package com.revconnect.dao.impl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.revconnect.dao.UserDAO;
+import com.revconnect.db.DBConnection;
 import com.revconnect.model.User;
-import com.revconnect.util.PasswordUtil;
 
 public class UserDAOImpl implements UserDAO {
 
-    // ---------------- LOGIN ----------------
+    // ================= REGISTER =================
     @Override
-    public User login(Connection con, String email, String password) {
+    public boolean register(Connection ignored, User user) {
 
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-            String sql =
-                "SELECT USER_ID, USERNAME, EMAIL, ROLE " +
-                "FROM USERS WHERE EMAIL = ? AND PASSWORD_HASH = ?";
-
-            ps = con.prepareStatement(sql);
-            ps.setString(1, email);
-            ps.setString(2, PasswordUtil.hashPassword(password));
-
-            rs = ps.executeQuery();
-
-            if (rs.next()) {
-                User user = new User();
-                user.setUserId(rs.getInt("USER_ID"));
-                user.setUsername(rs.getString("USERNAME"));
-                user.setEmail(rs.getString("EMAIL"));
-                user.setRole(rs.getString("ROLE"));
-                return user;
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            close(rs, ps);
-        }
-
-        return null;
-    }
-
-    // ---------------- REGISTER ----------------
-    @Override
-    public boolean register(Connection con, User user) {
-
+        Connection con = null;
         PreparedStatement ps = null;
 
         try {
-            String sql =
-                "INSERT INTO USERS (USERNAME, EMAIL, PASSWORD_HASH, ROLE) " +
-                "VALUES (?, ?, ?, ?)";
+            con = DBConnection.getConnection();
 
+            String sql = "INSERT INTO users (username, email, password_hash, bio, role) VALUES (?, ?, ?, ?, ?)";
             ps = con.prepareStatement(sql);
+
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getEmail());
-            ps.setString(3, PasswordUtil.hashPassword(user.getPassword()));
-            ps.setString(4, user.getRole());
+            ps.setString(3, hashPassword(user.getPassword())); 
+            ps.setString(4, user.getBio());
+            ps.setString(5, user.getRole());
 
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(null, ps);
+            closeResources(null, ps, con);
         }
-
         return false;
     }
 
-    // ---------------- UPDATE PROFILE ----------------
+    // ================= LOGIN =================
     @Override
-    public boolean updateProfile(Connection con, User user) {
+    public User login(Connection ignored, String email, String password) {
 
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            con = DBConnection.getConnection();
+
+            String sql = "SELECT * FROM users WHERE email = ? AND password_hash = ?";
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1, email);
+            ps.setString(2, hashPassword(password));
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return mapUser(rs); 
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeResources(rs, ps, con);
+        }
+        return null;
+    }
+
+    // ================= UPDATE PROFILE =================
+    @Override
+    public boolean updateProfile(Connection ignored, User user) {
+
+        Connection con = null;
         PreparedStatement ps = null;
 
         try {
-            String sql =
-                "UPDATE USERS SET BIO=?, LOCATION=?, WEBSITE=? WHERE USER_ID=?";
+            con = DBConnection.getConnection();
 
+            String sql = "UPDATE users SET username = ?, bio = ?, location = ?, website = ? WHERE user_id = ?";
             ps = con.prepareStatement(sql);
-            ps.setString(1, user.getBio());
-            ps.setString(2, user.getLocation());
-            ps.setString(3, user.getWebsite());
-            ps.setInt(4, user.getUserId());
+
+            ps.setString(1, user.getUsername());
+            ps.setString(2, user.getBio());
+            ps.setString(3, user.getLocation());
+            ps.setString(4, user.getWebsite());
+            ps.setInt(5, user.getUserId()); 
 
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(null, ps);
+            closeResources(null, ps, con);
         }
-
         return false;
     }
 
-    // ---------------- USER SEARCH (EXACT) ----------------
+    // ================= SEARCH BY USERNAME =================
     @Override
-    public User getUserByUsername(Connection con, String username) {
+    public User getUserByUsername(Connection ignored, String username) {
+        return getUserByUsernameExact(ignored, username);
+    }
 
+    @Override
+    public User getUserByUsernameIgnoreCase(Connection ignored, String username) {
+
+        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            String sql =
-                "SELECT USER_ID, USERNAME, EMAIL, BIO, LOCATION, WEBSITE " +
-                "FROM USERS WHERE USERNAME = ?";
+            con = DBConnection.getConnection();
 
+            String sql = "SELECT * FROM users WHERE LOWER(username) = LOWER(?)";
             ps = con.prepareStatement(sql);
             ps.setString(1, username);
 
             rs = ps.executeQuery();
-
             if (rs.next()) {
-                User user = new User();
-                user.setUserId(rs.getInt("USER_ID"));
-                user.setUsername(rs.getString("USERNAME"));
-                user.setEmail(rs.getString("EMAIL"));
-                user.setBio(rs.getString("BIO"));
-                user.setLocation(rs.getString("LOCATION"));
-                user.setWebsite(rs.getString("WEBSITE"));
-                return user;
+                return mapUser(rs);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(rs, ps);
+            closeResources(rs, ps, con);
         }
-
         return null;
     }
 
-    // ---------------- USER SEARCH (CASE INSENSITIVE) ----------------
     @Override
-    public User getUserByUsernameIgnoreCase(Connection con, String username) {
+    public User getUserByUsernameExact(Connection ignored, String username) {
 
+        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            String sql =
-                "SELECT USER_ID, USERNAME, EMAIL, BIO, LOCATION, WEBSITE " +
-                "FROM USERS WHERE UPPER(USERNAME) = UPPER(?)";
+            con = DBConnection.getConnection();
 
+            String sql = "SELECT * FROM users WHERE username = ?";
             ps = con.prepareStatement(sql);
             ps.setString(1, username);
 
             rs = ps.executeQuery();
-
             if (rs.next()) {
-                User user = new User();
-                user.setUserId(rs.getInt("USER_ID"));
-                user.setUsername(rs.getString("USERNAME"));
-                user.setEmail(rs.getString("EMAIL"));
-                user.setBio(rs.getString("BIO"));
-                user.setLocation(rs.getString("LOCATION"));
-                user.setWebsite(rs.getString("WEBSITE"));
-                return user;
+                return mapUser(rs);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(rs, ps);
+            closeResources(rs, ps, con);
         }
-
         return null;
     }
 
-    // ---------------- DUPLICATE EMAIL ----------------
+    // ================= SEARCH BY EMAIL =================
     @Override
-    public User getUserByEmail(Connection con, String email) {
+    public User getUserByEmail(Connection ignored, String email) {
 
+        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            String sql =
-                "SELECT USER_ID, USERNAME, EMAIL FROM USERS WHERE EMAIL = ?";
+            con = DBConnection.getConnection();
 
+            String sql = "SELECT * FROM users WHERE email = ?";
             ps = con.prepareStatement(sql);
             ps.setString(1, email);
 
             rs = ps.executeQuery();
-
             if (rs.next()) {
-                User user = new User();
-                user.setUserId(rs.getInt("USER_ID"));
-                user.setUsername(rs.getString("USERNAME"));
-                user.setEmail(rs.getString("EMAIL"));
-                return user;
+                return mapUser(rs);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(rs, ps);
+            closeResources(rs, ps, con);
         }
-
         return null;
     }
 
-    // ---------------- DUPLICATE USERNAME ----------------
+    // ================= RESET PASSWORD =================
     @Override
-    public User getUserByUsernameExact(Connection con, String username) {
-        return getUserByUsername(con, username);
-    }
+    public boolean resetPassword(Connection ignored, String email, String newPassword) {
 
-    // ---------------- FORGOT PASSWORD ----------------
-    @Override
-    public boolean resetPassword(Connection con, String email, String newPassword) {
-
+        Connection con = null;
         PreparedStatement ps = null;
 
         try {
-            String sql =
-                "UPDATE USERS SET PASSWORD_HASH = ? WHERE EMAIL = ?";
+            con = DBConnection.getConnection();
 
+            String sql = "UPDATE users SET password_hash = ? WHERE email = ?";
             ps = con.prepareStatement(sql);
-            ps.setString(1, PasswordUtil.hashPassword(newPassword));
+
+            ps.setString(1, hashPassword(newPassword));
             ps.setString(2, email);
 
             return ps.executeUpdate() > 0;
@@ -235,84 +211,131 @@ public class UserDAOImpl implements UserDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(null, ps);
+            closeResources(null, ps, con);
         }
-
         return false;
     }
 
-    // ---------------- SEARCH USERS ----------------
+    // ================= SEARCH USERS =================
     @Override
-    public List<User> searchUsers(Connection con, String keyword) {
+    public List<User> searchUsers(Connection ignored, String keyword) {
 
         List<User> list = new ArrayList<User>();
+        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            String sql =
-                "SELECT USER_ID, USERNAME, EMAIL, BIO, LOCATION, WEBSITE " +
-                "FROM USERS WHERE LOWER(USERNAME) LIKE LOWER(?)";
+            con = DBConnection.getConnection();
 
+            String sql = "SELECT * FROM users WHERE LOWER(username) LIKE LOWER(?)";
             ps = con.prepareStatement(sql);
             ps.setString(1, "%" + keyword + "%");
 
             rs = ps.executeQuery();
-
             while (rs.next()) {
-                User user = new User();
-                user.setUserId(rs.getInt("USER_ID"));
-                user.setUsername(rs.getString("USERNAME"));
-                user.setEmail(rs.getString("EMAIL"));
-                user.setBio(rs.getString("BIO"));
-                user.setLocation(rs.getString("LOCATION"));
-                user.setWebsite(rs.getString("WEBSITE"));
-                list.add(user);
+                list.add(mapUser(rs));
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(rs, ps);
+            closeResources(rs, ps, con);
         }
-
         return list;
     }
 
-    // ---------------- GET USER ID ----------------
+    // ================= GET USER ID =================
     @Override
-    public int getUserIdByUsername(Connection con, String username) {
+    public int getUserIdByUsername(Connection ignored, String username) {
 
+        Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            String sql = "SELECT USER_ID FROM USERS WHERE USERNAME = ?";
+            con = DBConnection.getConnection();
 
+            String sql = "SELECT user_id FROM users WHERE username = ?";
             ps = con.prepareStatement(sql);
             ps.setString(1, username);
 
             rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getInt("USER_ID");
+                return rs.getInt("USER_ID"); 
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(rs, ps);
+            closeResources(rs, ps, con);
         }
-
         return -1;
     }
 
-    // ---------------- UTILITY ----------------
-    private void close(ResultSet rs, PreparedStatement ps) {
+    // ================= MAP USER =================
+    private User mapUser(ResultSet rs) throws SQLException {
+
+        User user = new User();
+
+        user.setUserId(rs.getInt("USER_ID"));
+        user.setUsername(rs.getString("USERNAME"));
+        user.setEmail(rs.getString("EMAIL"));
+        user.setRole(rs.getString("ROLE"));
+        user.setBio(rs.getString("BIO"));
+        user.setLocation(rs.getString("LOCATION"));
+        user.setWebsite(rs.getString("WEBSITE"));
+
+        return user;
+    }
+
+    // ================= UTIL =================
+    private void closeResources(ResultSet rs, PreparedStatement ps, Connection con) {
+        try { if (rs != null) rs.close(); } catch (Exception e) {}
+        try { if (ps != null) ps.close(); } catch (Exception e) {}
+        try { if (con != null) con.close(); } catch (Exception e) {}
+    }
+
+    // ================= PASSWORD HASH =================
+    private String hashPassword(String password) {
         try {
-            if (rs != null) rs.close();
-            if (ps != null) ps.close();
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+            StringBuilder hex = new StringBuilder();
+            for (byte b : hash) {
+                hex.append(String.format("%02x", b));
+            }
+            return hex.toString();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
+    @Override
+    public String getUsernameById(Connection con, int userId) {
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            ps = con.prepareStatement(
+                "SELECT USERNAME FROM USERS WHERE USER_ID = ?"
+            );
+            ps.setInt(1, userId);
+
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("USERNAME");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try { if (rs != null) rs.close(); } catch (Exception e) {}
+            try { if (ps != null) ps.close(); } catch (Exception e) {}
+        }
+
+        return "user_" + userId;
+    }
+
 }

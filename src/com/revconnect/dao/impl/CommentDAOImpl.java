@@ -12,91 +12,88 @@ import com.revconnect.model.Comment;
 
 public class CommentDAOImpl implements CommentDAO {
 
-    @Override
-    public boolean addComment(Comment comment) {
+    // ---------------- ADD COMMENT ----------------
+	@Override
+	public boolean addComment(Comment c) {
 
-        Connection con = null;
-        PreparedStatement ps = null;
+	    Connection con = null;
+	    PreparedStatement ps = null;
 
-        try {
-            con = DBConnection.getConnection();
+	    try {
+	        con = DBConnection.getConnection();
 
-            String sql =
-                "INSERT INTO COMMENTS (POST_ID, USER_ID, CONTENT) " +
-                "VALUES (?, ?, ?)";
+	        String sql =
+	            "INSERT INTO comments " +
+	            "(comment_id, post_id, user_id, content) " +
+	            "VALUES (comments_seq.NEXTVAL, ?, ?, ?)";
 
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, comment.getPostId());
-            ps.setInt(2, comment.getUserId());
-            ps.setString(3, comment.getContent());
+	        ps = con.prepareStatement(sql);
+	        ps.setInt(1, c.getPostId());
+	        ps.setInt(2, c.getUserId());
+	        ps.setString(3, c.getContent());
 
-            return ps.executeUpdate() > 0;
+	        return ps.executeUpdate() > 0;
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+	    } catch (Exception e) {
+	        System.out.println("ERROR inserting comment:");
+	        e.printStackTrace();
+	    } finally {
+	        closeResources(null, ps, con);
+	    }
 
-        return false;
-    }
-
-    @Override
-    public List<Comment> getCommentsByPost(int postId) {
-
-        List<Comment> comments = new ArrayList<Comment>();
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-            con = DBConnection.getConnection();
-
-            String sql =
-            	    "SELECT c.COMMENT_ID, c.POST_ID, c.USER_ID, c.CONTENT, c.CREATED_AT, " +
-            	    "u.USERNAME AS USERNAME " +
-            	    "FROM COMMENTS c " +
-            	    "JOIN USERS u ON c.USER_ID = u.USER_ID " +
-            	    "WHERE c.POST_ID = ? " +
-            	    "ORDER BY c.CREATED_AT";
+	    return false;
+	}
 
 
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, postId);
+    // ---------------- GET COMMENTS BY POST ----------------
+	@Override
+	public List<Comment> getCommentsByPost(int postId) {
 
-            rs = ps.executeQuery();
+	    List<Comment> list = new ArrayList<Comment>();
+	    Connection con = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
 
-            while (rs.next()) {
-                Comment comment = new Comment();
-                comment.setCommentId(rs.getInt("COMMENT_ID"));
-                comment.setUserId(rs.getInt("USER_ID"));
-                comment.setContent(rs.getString("CONTENT"));
-                comment.setUsername(rs.getString("USERNAME"));
-                comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+	    try {
+	        con = DBConnection.getConnection();
 
-                comments.add(comment);
-            }
+	        String sql =
+	            "SELECT c.comment_id, c.post_id, c.user_id, c.content, c.created_at, " +
+	            "u.username " +
+	            "FROM comments c " +
+	            "LEFT JOIN users u ON c.user_id = u.user_id " +
+	            "WHERE c.post_id = ? " +
+	            "ORDER BY c.created_at ASC";
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+	        ps = con.prepareStatement(sql);
+	        ps.setInt(1, postId);
 
-        return comments;
-    }
+	        rs = ps.executeQuery();
+	        while (rs.next()) {
 
+	            Comment c = new Comment();
+	            c.setCommentId(rs.getInt("COMMENT_ID"));
+	            c.setPostId(rs.getInt("POST_ID"));
+	            c.setUserId(rs.getInt("USER_ID"));
+	            c.setContent(rs.getString("CONTENT"));
+	            c.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+	            c.setUsername(rs.getString("USERNAME"));
+
+	            list.add(c);
+	        }
+
+	    } catch (Exception e) {
+	        System.out.println("ERROR fetching comments:");
+	        e.printStackTrace();
+	    } finally {
+	        closeResources(rs, ps, con);
+	    }
+
+	    return list;
+	}
+
+
+    // ---------------- DELETE COMMENT ----------------
     @Override
     public boolean deleteComment(int commentId, int userId) {
 
@@ -119,14 +116,34 @@ public class CommentDAOImpl implements CommentDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(null, ps, con);
         }
 
         return false;
     }
+
+    // ---------------- UTILITY ----------------
+    private void close(ResultSet rs, PreparedStatement ps, Connection con) {
+        try { if (rs != null) rs.close(); } catch (Exception e) {}
+        try { if (ps != null) ps.close(); } catch (Exception e) {}
+        try { if (con != null) con.close(); } catch (Exception e) {}
+    }
+ // ================= CLOSE DB RESOURCES =================
+    private void closeResources(ResultSet rs, PreparedStatement ps, Connection con) {
+        try {
+            if (rs != null) rs.close();
+        } catch (Exception e) {
+        }
+
+        try {
+            if (ps != null) ps.close();
+        } catch (Exception e) {
+        }
+
+        try {
+            if (con != null) con.close();
+        } catch (Exception e) {
+        }
+    }
+
 }

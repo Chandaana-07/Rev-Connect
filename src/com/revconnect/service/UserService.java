@@ -15,11 +15,11 @@ public class UserService {
     public UserService() {
         dao = new UserDAOImpl();
     }
-    
+
+    // For Mockito / Testing
     public UserService(UserDAO dao) {
         this.dao = dao;
     }
-
 
     // ---------------- REGISTER ----------------
     public boolean registerUser(User user) {
@@ -27,11 +27,15 @@ public class UserService {
         Connection con = null;
         try {
             con = DBConnection.getConnection();
+
+            if (con == null) {
+                System.out.println("Database is currently unavailable.");
+                return false;
+            }
+
             return dao.register(con, user);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            close(con);
         }
         return false;
     }
@@ -42,11 +46,15 @@ public class UserService {
         Connection con = null;
         try {
             con = DBConnection.getConnection();
+
+            if (con == null) {
+                System.out.println("Database is currently unavailable.");
+                return null;
+            }
+
             return dao.login(con, email, password);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            close(con);
         }
         return null;
     }
@@ -57,11 +65,15 @@ public class UserService {
         Connection con = null;
         try {
             con = DBConnection.getConnection();
+
+            if (con == null) {
+                System.out.println("Database is currently unavailable.");
+                return false;
+            }
+
             return dao.updateProfile(con, user);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            close(con);
         }
         return false;
     }
@@ -72,11 +84,15 @@ public class UserService {
         Connection con = null;
         try {
             con = DBConnection.getConnection();
+
+            if (con == null) {
+                System.out.println("Database is currently unavailable.");
+                return null;
+            }
+
             return dao.getUserByUsername(con, username);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            close(con);
         }
         return null;
     }
@@ -86,11 +102,15 @@ public class UserService {
         Connection con = null;
         try {
             con = DBConnection.getConnection();
+
+            if (con == null) {
+                System.out.println("Database is currently unavailable.");
+                return null;
+            }
+
             return dao.getUserByUsernameIgnoreCase(con, username);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            close(con);
         }
         return null;
     }
@@ -101,11 +121,15 @@ public class UserService {
         Connection con = null;
         try {
             con = DBConnection.getConnection();
+
+            if (con == null) {
+                System.out.println("Database is currently unavailable.");
+                return false;
+            }
+
             return dao.getUserByEmail(con, email) != null;
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            close(con);
         }
         return false;
     }
@@ -115,11 +139,15 @@ public class UserService {
         Connection con = null;
         try {
             con = DBConnection.getConnection();
+
+            if (con == null) {
+                System.out.println("Database is currently unavailable.");
+                return false;
+            }
+
             return dao.getUserByUsernameExact(con, username) != null;
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            close(con);
         }
         return false;
     }
@@ -130,11 +158,15 @@ public class UserService {
         Connection con = null;
         try {
             con = DBConnection.getConnection();
+
+            if (con == null) {
+                System.out.println("Database is currently unavailable.");
+                return false;
+            }
+
             return dao.resetPassword(con, email, newPassword);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            close(con);
         }
         return false;
     }
@@ -145,11 +177,15 @@ public class UserService {
         Connection con = null;
         try {
             con = DBConnection.getConnection();
+
+            if (con == null) {
+                System.out.println("Database is currently unavailable.");
+                return null;
+            }
+
             return dao.searchUsers(con, keyword);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            close(con);
         }
         return null;
     }
@@ -160,21 +196,30 @@ public class UserService {
         Connection con = null;
         try {
             con = DBConnection.getConnection();
+
+            if (con == null) {
+                System.out.println("Database is currently unavailable.");
+                return -1;
+            }
+
             return dao.getUserIdByUsername(con, username);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            close(con);
         }
         return -1;
     }
-
-    // ---------------- UTILITY ----------------
-    private void close(Connection con) {
+ // --- Added for Notifications / Likes ---
+    public String getUsernameById(int userId) {
+        Connection con = null;
         try {
-            if (con != null) con.close();
+            con = DBConnection.getConnection();
+            return dao.getUsernameById(con, userId);
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try { if (con != null) con.close(); } catch (Exception e) {}
         }
+        return "user_" + userId; // fallback
     }
+
 }

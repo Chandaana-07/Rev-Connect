@@ -25,4 +25,7 @@ public interface PostDAO {
     List<String> getTrendingHashtags(Connection con);
 
     Post getPostById(Connection con, int postId);
+    
+    int getPostOwner(Connection con, int postId);
+
 }

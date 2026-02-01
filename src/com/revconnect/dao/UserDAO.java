@@ -25,4 +25,7 @@ public interface UserDAO {
     List<User> searchUsers(Connection con, String keyword);
 
     int getUserIdByUsername(Connection con, String username);
+    
+    String getUsernameById(Connection con, int userId);
+
 }

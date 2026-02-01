@@ -1,89 +1,43 @@
 package com.revconnect.service;
 
-import com.revconnect.model.Notification;
-
-import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
+
+import com.revconnect.dao.NotificationDAO;
+import com.revconnect.dao.impl.NotificationDAOImpl;
+import com.revconnect.model.Notification;
 
 public class NotificationService {
 
-    private final String FILE = "notifications.dat";
+    private NotificationDAO dao = new NotificationDAOImpl();
 
-    // Save new notification
-    public void addNotification(Notification n) {
-        List<Notification> list = getAll();
-        list.add(n);
-        saveAll(list);
+    // Create notification
+    public void notifyUser(int userId, String message) {
+        Notification n = new Notification();
+        n.setUserId(userId);
+        n.setMessage(message);
+        dao.createNotification(n);
     }
 
-    // Get all notifications
-    private List<Notification> getAll() {
-        try {
-            ObjectInputStream ois =
-                    new ObjectInputStream(new FileInputStream(FILE));
-            return (List<Notification>) ois.readObject();
-        } catch (Exception e) {
-            return new ArrayList<Notification>();
-        }
-    }
-
-    // Get user's notifications
-    public List<Notification> getUserNotifications(int userId) {
-        List<Notification> result = new ArrayList<Notification>();
-        for (Notification n : getAll()) {
-            if (n.getUserId() == userId) {
-                result.add(n);
-            }
-        }
-        return result;
+    // Get all my notifications
+    public List<Notification> getMyNotifications(int userId) {
+        return dao.getMyNotifications(userId);
     }
 
     // Unread count
     public int getUnreadCount(int userId) {
-        int count = 0;
-        for (Notification n : getUserNotifications(userId)) {
-            if (!n.isRead()) {
-                count++;
-            }
-        }
-        return count;
+        return dao.getUnreadCount(userId);
+    }
+
+    // Mark single as read
+    public void markRead(int notifId, int userId) {
+        dao.markAsRead(notifId, userId);
     }
 
     // Mark all as read
     public void markAllRead(int userId) {
-        List<Notification> list = getAll();
+        List<Notification> list = getMyNotifications(userId);
         for (Notification n : list) {
-            if (n.getUserId() == userId) {
-                n.setRead(true);
-            }
-        }
-        saveAll(list);
-    }
-
-    private void saveAll(List<Notification> list) {
-        try {
-            ObjectOutputStream oos =
-                    new ObjectOutputStream(new FileOutputStream(FILE));
-            oos.writeObject(list);
-            oos.close();
-        } catch (Exception e) {
-            System.out.println("Error saving notifications");
+            dao.markAsRead(n.getNotificationId(), userId);
         }
     }
-    public void markRead(int userId) {
-        markAllRead(userId);
-    }
-    public void notifyUser(int userId, String message) {
-        addNotification(
-                new com.revconnect.model.Notification(
-                        userId,
-                        "FOLLOW",
-                        message
-                )
-        );
-    }
-
-    }
-
-
+}

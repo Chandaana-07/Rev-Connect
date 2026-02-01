@@ -35,14 +35,8 @@ public class NotificationDAOImpl implements NotificationDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(null, ps, con);
         }
-
         return false;
     }
 
@@ -71,7 +65,7 @@ public class NotificationDAOImpl implements NotificationDAO {
 
             while (rs.next()) {
                 Notification n = new Notification();
-                n.setNotificationId(rs.getInt("notif_id"));
+                n.setNotificationId(rs.getInt("NOTIF_ID"));
                 n.setUserId(rs.getInt("USER_ID"));
                 n.setMessage(rs.getString("MESSAGE"));
                 n.setRead(rs.getInt("IS_READ") == 1);
@@ -83,13 +77,7 @@ public class NotificationDAOImpl implements NotificationDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(rs, ps, con);
         }
 
         return list;
@@ -119,14 +107,8 @@ public class NotificationDAOImpl implements NotificationDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(null, ps, con);
         }
-
         return false;
     }
 
@@ -149,7 +131,6 @@ public class NotificationDAOImpl implements NotificationDAO {
             ps.setInt(1, userId);
 
             rs = ps.executeQuery();
-
             if (rs.next()) {
                 return rs.getInt(1);
             }
@@ -157,15 +138,15 @@ public class NotificationDAOImpl implements NotificationDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(rs, ps, con);
         }
-
         return 0;
+    }
+
+    // ---------------- UTILITY ----------------
+    private void close(ResultSet rs, PreparedStatement ps, Connection con) {
+        try { if (rs != null) rs.close(); } catch (Exception e) {}
+        try { if (ps != null) ps.close(); } catch (Exception e) {}
+        try { if (con != null) con.close(); } catch (Exception e) {}
     }
 }
