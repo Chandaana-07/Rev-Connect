@@ -10,9 +10,10 @@ import com.revconnect.db.DefaultConnectionProvider;
 
 import java.sql.Connection;
 import java.util.List;
+import org.apache.log4j.Logger;
 
 public class UserService {
-
+	private static final Logger logger = Logger.getLogger(UserService.class);
     private UserDAO dao;
     private ConnectionProvider connectionProvider;
 
@@ -51,19 +52,32 @@ public class UserService {
 
         Connection con = null;
         try {
+        	 logger.info("Login attempt started for user: " + email);
             con = connectionProvider.getConnection();
 
             if (con == null) {
+                logger.error("Database connection failed during login");
                 System.out.println("Database is currently unavailable.");
                 return null;
             }
+            User user = dao.login(con, email, password);
 
-            return dao.login(con, email, password);
+            if (user != null) {
+                logger.info("Login successful for user: " + user.getUsername());
+            } else {
+                logger.warn("Login failed - invalid credentials for: " + email);
+            }
+
+            return user;
+
+
         } catch (Exception e) {
+        	  logger.error("Exception during login for user: " + email, e);
             e.printStackTrace();
         }
         return null;
     }
+    
 
     // ---------------- UPDATE PROFILE ----------------
     public boolean updateProfile(User user) {

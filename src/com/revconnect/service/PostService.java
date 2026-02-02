@@ -10,9 +10,11 @@ import com.revconnect.db.ConnectionProvider;
 import com.revconnect.db.DefaultConnectionProvider;
 import com.revconnect.db.DBConnection;
 import com.revconnect.model.Post;
+import org.apache.log4j.Logger;
 
 public class PostService {
-
+	private static final Logger logger =
+            Logger.getLogger(PostService.class);
     private PostDAO dao;
     private ConnectionProvider connectionProvider;
 
@@ -20,148 +22,309 @@ public class PostService {
     public PostService() {
         this.dao = new PostDAOImpl();
         this.connectionProvider = new DefaultConnectionProvider();
+        logger.info("PostService initialized (Default Constructor)");
+
     }
 
     // ================= TEST CONSTRUCTOR =================
     public PostService(PostDAO dao, ConnectionProvider provider) {
         this.dao = dao;
         this.connectionProvider = provider;
+        logger.info("PostService initialized (Test Constructor)");
+
     }
 
     // ---------------- CREATE ----------------
     public boolean createPost(int userId, String postName, String content, String postType) {
-        try {
-            Connection con = DBConnection.getConnection();
-            return dao.createPost(con, userId, postName, content, postType);
-        } catch (Exception e) {
-            System.out.println("Error creating post.");
-            e.printStackTrace();
-        }
+    	  logger.info("Create post attempt | User ID: "
+                  + userId
+                  + " | Post Name: "
+                  + postName
+                  + " | Type: "
+                  + postType);
+    	  try {
+              Connection con = DBConnection.getConnection();
+              boolean success =
+                      dao.createPost(con, userId, postName, content, postType);
+
+              if (success) {
+                  logger.info("Post created successfully | User ID: "
+                          + userId
+                          + " | Post Name: "
+                          + postName);
+              } else {
+                  logger.warn("Post creation failed | User ID: "
+                          + userId
+                          + " | Post Name: "
+                          + postName);
+              }
+
+              return success;
+
+          } catch (Exception e) {
+              logger.error("Error creating post | User ID: "
+                      + userId
+                      + " | Post Name: "
+                      + postName, e);
+          }
         return false;
     }
 
     // ---------------- VIEW MY POSTS ----------------
     public List<Post> getPostsByUser(int userId) {
+
+        logger.info("Fetching posts by user | User ID: " + userId);
+
         try {
             Connection con = DBConnection.getConnection();
-            return dao.getPostsByUser(con, userId);
+            List<Post> list =
+                    dao.getPostsByUser(con, userId);
+
+            logger.info("Posts fetched | User ID: "
+                    + userId
+                    + " | Count: "
+                    + list.size());
+
+            return list;
+
         } catch (Exception e) {
-            System.out.println("Error fetching posts.");
-            e.printStackTrace();
+            logger.error("Error fetching posts | User ID: " + userId, e);
         }
         return new ArrayList<Post>();
     }
 
     // ---------------- GLOBAL FEED ----------------
     public List<Post> getAllPosts() {
+
+        logger.info("Fetching global feed");
+
         try {
             Connection con = DBConnection.getConnection();
-            return dao.getAllPosts(con);
+            List<Post> list =
+                    dao.getAllPosts(con);
+
+            logger.info("Global feed loaded | Count: " + list.size());
+
+            return list;
+
         } catch (Exception e) {
-            System.out.println("Error loading global feed.");
-            e.printStackTrace();
+            logger.error("Error loading global feed", e);
         }
         return new ArrayList<Post>();
     }
-
     // ---------------- CONNECTION FEED ----------------
     public List<Post> getFeedPosts(int userId) {
+
+        logger.info("Fetching feed | User ID: " + userId);
+
         try {
             Connection con = DBConnection.getConnection();
-            return dao.getFeedPosts(con, userId);
+            List<Post> list =
+                    dao.getFeedPosts(con, userId);
+
+            logger.info("Feed loaded | User ID: "
+                    + userId
+                    + " | Count: "
+                    + list.size());
+
+            return list;
+
         } catch (Exception e) {
-            System.out.println("Error loading feed.");
-            e.printStackTrace();
+            logger.error("Error loading feed | User ID: " + userId, e);
         }
         return new ArrayList<Post>();
     }
 
     // ---------------- EDIT BY POST NAME ----------------
-    public boolean updatePostByName(int userId, String postName, String newContent) {
-        try {
-            Connection con = DBConnection.getConnection();
+    public boolean updatePostByName(int userId,
+            String postName,
+            String newContent) {
 
-            int postId = dao.getPostIdByName(con, postName, userId);
-            if (postId == -1) {
-                System.out.println("Post not found!");
-                return false;
-            }
-
-            return dao.updatePost(con, postId, userId, newContent);
-        } catch (Exception e) {
-            System.out.println("Error updating post.");
-            e.printStackTrace();
-        }
-        return false;
-    }
+    		logger.info("Update post attempt | User ID: "
+    				+ userId
+    				+ " | Post Name: "
+			+ postName);
+			
+			try {
+			Connection con = DBConnection.getConnection();
+			
+			int postId =
+			dao.getPostIdByName(con, postName, userId);
+			
+			if (postId == -1) {
+			logger.warn("Post not found | User ID: "
+			+ userId
+			+ " | Post Name: "
+			+ postName);
+			return false;
+			}
+			
+			boolean success =
+			dao.updatePost(con, postId, userId, newContent);
+			
+			if (success) {
+			logger.info("Post updated successfully | Post ID: " + postId);
+			} else {
+			logger.warn("Post update failed | Post ID: " + postId);
+			}
+			
+			return success;
+			
+			} catch (Exception e) {
+			logger.error("Error updating post | User ID: "
+			+ userId
+			+ " | Post Name: "
+			+ postName, e);
+			}
+			return false;
+			}
+			
 
     // ---------------- DELETE BY POST NAME ----------------
-    public boolean deletePostByName(int userId, String postName) {
-        try {
-            Connection con = DBConnection.getConnection();
+    public boolean deletePostByName(int userId,
+            String postName) {
 
-            int postId = dao.getPostIdByName(con, postName, userId);
-            if (postId == -1) {
-                System.out.println("Post not found!");
-                return false;
-            }
-
-            return dao.deletePost(con, postId, userId);
-        } catch (Exception e) {
-            System.out.println("Error deleting post.");
-            e.printStackTrace();
-        }
-        return false;
-    }
-
+			logger.info("Delete post attempt | User ID: "
+			+ userId
+			+ " | Post Name: "
+			+ postName);
+			
+			try {
+			Connection con = DBConnection.getConnection();
+			
+			int postId =
+			dao.getPostIdByName(con, postName, userId);
+			
+			if (postId == -1) {
+			logger.warn("Post not found | User ID: "
+			+ userId
+			+ " | Post Name: "
+			+ postName);
+			return false;
+			}
+			
+			boolean success =
+			dao.deletePost(con, postId, userId);
+			
+			if (success) {
+			logger.info("Post deleted successfully | Post ID: " + postId);
+			} else {
+			logger.warn("Post delete failed | Post ID: " + postId);
+			}
+			
+			return success;
+			
+			} catch (Exception e) {
+			logger.error("Error deleting post | User ID: "
+			+ userId
+			+ " | Post Name: "
+			+ postName, e);
+			}
+			return false;
+			}
     // ---------------- SEARCH BY HASHTAG ----------------
     public List<Post> searchByHashtag(String tag) {
+
+        logger.info("Search by hashtag | Tag: " + tag);
+
         try {
             Connection con = DBConnection.getConnection();
-            return dao.searchByHashtag(con, tag);
+            List<Post> list =
+                    dao.searchByHashtag(con, tag);
+
+            logger.info("Hashtag search result | Tag: "
+                    + tag
+                    + " | Count: "
+                    + list.size());
+
+            return list;
+
         } catch (Exception e) {
-            System.out.println("Error searching hashtag.");
-            e.printStackTrace();
+            logger.error("Error searching hashtag | Tag: " + tag, e);
         }
         return new ArrayList<Post>();
     }
 
     // ---------------- TRENDING HASHTAGS ----------------
     public List<String> getTrendingHashtags() {
+
+        logger.info("Fetching trending hashtags");
+
         try {
             Connection con = DBConnection.getConnection();
-            return dao.getTrendingHashtags(con);
+            List<String> list =
+                    dao.getTrendingHashtags(con);
+
+            logger.info("Trending hashtags loaded | Count: "
+                    + list.size());
+
+            return list;
+
         } catch (Exception e) {
-            System.out.println("Error loading trending hashtags.");
-            e.printStackTrace();
+            logger.error("Error loading trending hashtags", e);
         }
         return new ArrayList<String>();
     }
 
     // ---------------- POST ANALYTICS ----------------
     public Post getPostAnalytics(int postId) {
+
+        logger.info("Fetching post analytics | Post ID: " + postId);
+
         try {
             Connection con = DBConnection.getConnection();
-            return dao.getPostById(con, postId);
+            Post post =
+                    dao.getPostById(con, postId);
+
+            if (post != null) {
+                logger.info("Post analytics loaded | Post ID: " + postId);
+            } else {
+                logger.warn("Post not found | Post ID: " + postId);
+            }
+
+            return post;
+
         } catch (Exception e) {
-            System.out.println("Error loading post analytics.");
-            e.printStackTrace();
+            logger.error("Error loading post analytics | Post ID: "
+                    + postId, e);
         }
         return null;
     }
 
     // ---------------- SHARE ----------------
     public void sharePost(int postId, String targetUser) {
-        System.out.println("Sharing post ID " + postId + " with user " + targetUser);
+
+        logger.info("Share post | Post ID: "
+                + postId
+                + " | Target User: "
+                + targetUser);
+
+        System.out.println("Sharing post ID "
+                + postId
+                + " with user "
+                + targetUser);
     }
     public int getPostOwner(int postId) {
-    	 try {
-    	        Connection con = DBConnection.getConnection();
-    	        return dao.getPostOwner(con, postId);
-    	    } catch (Exception e) {
-    	        e.printStackTrace();
-    	    }
-    	    return -1;
-    	}
+
+        logger.info("Fetching post owner | Post ID: " + postId);
+
+        try {
+            Connection con = DBConnection.getConnection();
+            int ownerId =
+                    dao.getPostOwner(con, postId);
+
+            logger.info("Post owner found | Post ID: "
+                    + postId
+                    + " | Owner ID: "
+                    + ownerId);
+
+            return ownerId;
+
+        } catch (Exception e) {
+            logger.error("Error fetching post owner | Post ID: "
+                    + postId, e);
+        }
+        return -1;
+    }
 
 }

@@ -1,0 +1,266 @@
+2026-02-02 10:57:23 INFO  com.revconnect.main.RevConnectApp - Database is connected successfully
+2026-02-02 10:57:23 INFO  com.revconnect.main.RevConnectApp - Main menu started
+2026-02-02 11:25:10 INFO  com.revconnect.main.RevConnectApp - Database is connected successfully
+2026-02-02 11:25:10 INFO  com.revconnect.main.RevConnectApp - Main menu started
+2026-02-02 14:42:18 INFO  com.revconnect.main.RevConnectApp - Database is connected successfully
+2026-02-02 14:42:18 INFO  com.revconnect.main.RevConnectApp - Main menu started
+2026-02-02 14:42:41 INFO  com.revconnect.service.UserService - Login attempt started for user: chandana@gmail.com
+2026-02-02 14:42:41 INFO  com.revconnect.service.UserService - Login successful for user: chandana
+2026-02-02 14:42:41 INFO  com.revconnect.ui.UserMenu - UserMenu started for user: chandana (ID: 29)
+2026-02-02 14:42:41 INFO  com.revconnect.ui.UserMenu - Entered User Dashboard
+2026-02-02 14:43:01 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 9
+2026-02-02 14:43:01 INFO  com.revconnect.ui.UserMenu - User logged out: chandana
+2026-02-02 14:43:16 INFO  com.revconnect.service.UserService - Login attempt started for user: chandana@gmail.com
+2026-02-02 14:43:16 WARN  com.revconnect.service.UserService - Login failed - invalid credentials for: chandana@gmail.com
+2026-02-02 14:56:49 INFO  com.revconnect.main.RevConnectApp - Database is connected successfully
+2026-02-02 14:56:49 INFO  com.revconnect.main.RevConnectApp - Main menu started
+2026-02-02 14:57:16 INFO  com.revconnect.service.UserService - Login attempt started for user: chandana@gmail.com
+2026-02-02 14:57:16 INFO  com.revconnect.service.UserService - Login successful for user: chandana
+2026-02-02 14:57:16 INFO  com.revconnect.ui.UserMenu - UserMenu started for user: chandana (ID: 29)
+2026-02-02 14:57:16 INFO  com.revconnect.ui.UserMenu - Entered User Dashboard
+2026-02-02 18:25:43 INFO  com.revconnect.main.RevConnectApp - Database is connected successfully
+2026-02-02 18:25:43 INFO  com.revconnect.main.RevConnectApp - Main menu started
+2026-02-02 18:25:56 INFO  com.revconnect.service.UserService - Login attempt started for user: satya@gmail.com
+2026-02-02 18:25:57 INFO  com.revconnect.service.UserService - Login successful for user: satya
+2026-02-02 18:25:57 INFO  com.revconnect.service.MessageService - MessageService initialized (Default Constructor)
+2026-02-02 18:25:57 INFO  com.revconnect.service.LikeService - LikeService initialized (Default Constructor)
+2026-02-02 18:25:57 INFO  com.revconnect.ui.UserMenu - UserMenu started for user: satya (ID: 51)
+2026-02-02 18:25:57 INFO  com.revconnect.ui.UserMenu - Entered User Dashboard
+2026-02-02 18:26:05 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 6
+2026-02-02 18:26:05 INFO  com.revconnect.ui.UserMenu - Opened Likes & Comments Menu
+2026-02-02 18:26:08 INFO  com.revconnect.ui.UserMenu - User 51 liked post 6
+2026-02-02 18:26:08 INFO  com.revconnect.service.LikeService - Like attempt | User ID: 51 | Post ID: 6
+2026-02-02 18:26:08 INFO  com.revconnect.service.LikeService - Post liked successfully | User ID: 51 | Post ID: 6
+2026-02-02 18:26:08 INFO  com.revconnect.service.LikeService - Like notification sent | From User ID: 51 | To User ID: 29
+2026-02-02 18:26:14 INFO  com.revconnect.ui.UserMenu - Exited Likes & Comments Menu
+2026-02-02 18:26:15 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 9
+2026-02-02 18:26:15 INFO  com.revconnect.ui.UserMenu - User logged out: satya
+2026-02-02 18:26:29 INFO  com.revconnect.service.UserService - Login attempt started for user: chandana@gmail.com
+2026-02-02 18:26:29 INFO  com.revconnect.service.UserService - Login successful for user: chandana
+2026-02-02 18:26:29 INFO  com.revconnect.service.MessageService - MessageService initialized (Default Constructor)
+2026-02-02 18:26:29 INFO  com.revconnect.service.LikeService - LikeService initialized (Default Constructor)
+2026-02-02 18:26:29 INFO  com.revconnect.ui.UserMenu - UserMenu started for user: chandana (ID: 29)
+2026-02-02 18:26:29 INFO  com.revconnect.ui.UserMenu - Entered User Dashboard
+2026-02-02 18:26:35 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 7
+2026-02-02 18:26:35 INFO  com.revconnect.ui.UserMenu - Viewed Notifications
+2026-02-02 18:26:35 INFO  com.revconnect.ui.UserMenu - Fetching notifications for user 29
+2026-02-02 18:26:45 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 9
+2026-02-02 18:26:45 INFO  com.revconnect.ui.UserMenu - User logged out: chandana
+2026-02-02 18:37:20 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Test Constructor)
+2026-02-02 18:37:20 INFO  com.revconnect.service.NotificationService - Creating notification | User ID: 1 | Message: New comment
+2026-02-02 18:37:20 INFO  com.revconnect.service.NotificationService - Notification created successfully | User ID: 1
+2026-02-02 18:37:20 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Test Constructor)
+2026-02-02 18:37:20 INFO  com.revconnect.service.NotificationService - Fetching notifications | User ID: 2
+2026-02-02 18:37:20 INFO  com.revconnect.service.NotificationService - Notifications fetched | User ID: 2 | Count: 1
+2026-02-02 18:37:20 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Test Constructor)
+2026-02-02 18:37:20 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 3
+2026-02-02 18:37:20 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 3 | Count: 2
+2026-02-02 18:37:20 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Test Constructor)
+2026-02-02 18:37:20 INFO  com.revconnect.service.NotificationService - Marking notification as read | Notif ID: 10 | User ID: 4
+2026-02-02 18:37:20 INFO  com.revconnect.service.NotificationService - Notification marked as read | Notif ID: 10
+2026-02-02 18:37:35 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Test Constructor)
+2026-02-02 18:37:35 INFO  com.revconnect.service.NotificationService - Fetching notifications | User ID: 2
+2026-02-02 18:37:35 INFO  com.revconnect.service.NotificationService - Notifications fetched | User ID: 2 | Count: 1
+2026-02-02 18:37:35 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Test Constructor)
+2026-02-02 18:37:35 INFO  com.revconnect.service.NotificationService - Creating notification | User ID: 1 | Message: New comment
+2026-02-02 18:37:35 INFO  com.revconnect.service.NotificationService - Notification created successfully | User ID: 1
+2026-02-02 18:37:35 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Test Constructor)
+2026-02-02 18:37:35 INFO  com.revconnect.service.NotificationService - Marking notification as read | Notif ID: 10 | User ID: 4
+2026-02-02 18:37:35 INFO  com.revconnect.service.NotificationService - Notification marked as read | Notif ID: 10
+2026-02-02 18:37:35 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Test Constructor)
+2026-02-02 18:37:35 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 3
+2026-02-02 18:37:35 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 3 | Count: 2
+2026-02-02 18:37:46 INFO  com.revconnect.main.RevConnectApp - Database is connected successfully
+2026-02-02 18:37:46 INFO  com.revconnect.main.RevConnectApp - Main menu started
+2026-02-02 18:38:00 INFO  com.revconnect.service.UserService - Login attempt started for user: chandana@gmail.com
+2026-02-02 18:38:00 INFO  com.revconnect.service.UserService - Login successful for user: chandana
+2026-02-02 18:38:00 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:38:00 INFO  com.revconnect.service.MessageService - MessageService initialized (Default Constructor)
+2026-02-02 18:38:00 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:38:00 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:38:00 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:38:00 INFO  com.revconnect.service.LikeService - LikeService initialized (Default Constructor)
+2026-02-02 18:38:00 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:38:00 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:38:00 INFO  com.revconnect.ui.UserMenu - UserMenu started for user: chandana (ID: 29)
+2026-02-02 18:38:00 INFO  com.revconnect.ui.UserMenu - Entered User Dashboard
+2026-02-02 18:38:00 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 29
+2026-02-02 18:38:00 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 29 | Count: 5
+2026-02-02 18:38:02 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 7
+2026-02-02 18:38:02 INFO  com.revconnect.ui.UserMenu - Viewed Notifications
+2026-02-02 18:38:02 INFO  com.revconnect.ui.UserMenu - Fetching notifications for user 29
+2026-02-02 18:38:02 INFO  com.revconnect.service.NotificationService - Fetching notifications | User ID: 29
+2026-02-02 18:38:02 INFO  com.revconnect.service.NotificationService - Notifications fetched | User ID: 29 | Count: 5
+2026-02-02 18:38:02 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 29
+2026-02-02 18:38:02 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 29 | Count: 5
+2026-02-02 18:45:54 INFO  com.revconnect.main.RevConnectApp - Database is connected successfully
+2026-02-02 18:45:54 INFO  com.revconnect.main.RevConnectApp - Main menu started
+2026-02-02 18:46:08 INFO  com.revconnect.service.UserService - Login attempt started for user: satya@gmail.com
+2026-02-02 18:46:08 INFO  com.revconnect.service.UserService - Login successful for user: satya
+2026-02-02 18:46:08 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:46:08 INFO  com.revconnect.service.MessageService - MessageService initialized (Default Constructor)
+2026-02-02 18:46:08 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:46:08 INFO  com.revconnect.service.CommentService - CommentService initialized
+2026-02-02 18:46:08 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:46:08 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:46:08 INFO  com.revconnect.service.LikeService - LikeService initialized (Default Constructor)
+2026-02-02 18:46:08 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:46:08 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:46:08 INFO  com.revconnect.ui.UserMenu - UserMenu started for user: satya (ID: 51)
+2026-02-02 18:46:08 INFO  com.revconnect.ui.UserMenu - Entered User Dashboard
+2026-02-02 18:46:08 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 51
+2026-02-02 18:46:08 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 51 | Count: 5
+2026-02-02 18:46:11 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 6
+2026-02-02 18:46:11 INFO  com.revconnect.ui.UserMenu - Opened Likes & Comments Menu
+2026-02-02 18:46:19 INFO  com.revconnect.service.CommentService - Add comment attempt | User ID: 51 | Post ID: 6
+2026-02-02 18:46:19 INFO  com.revconnect.service.CommentService - Comment added successfully | Comment: good
+2026-02-02 18:46:19 INFO  com.revconnect.service.NotificationService - Creating notification | User ID: 29 | Message: @satya commented on your post: "good"
+2026-02-02 18:46:19 INFO  com.revconnect.service.NotificationService - Notification created successfully | User ID: 29
+2026-02-02 18:46:19 INFO  com.revconnect.service.CommentService - Comment notification sent | From User ID: 51 | To User ID: 29
+2026-02-02 18:46:24 INFO  com.revconnect.ui.UserMenu - Exited Likes & Comments Menu
+2026-02-02 18:46:24 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 51
+2026-02-02 18:46:24 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 51 | Count: 5
+2026-02-02 18:46:25 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 9
+2026-02-02 18:46:25 INFO  com.revconnect.ui.UserMenu - User logged out: satya
+2026-02-02 18:55:32 INFO  com.revconnect.main.RevConnectApp - Database is connected successfully
+2026-02-02 18:55:32 INFO  com.revconnect.main.RevConnectApp - Main menu started
+2026-02-02 18:55:45 INFO  com.revconnect.service.UserService - Login attempt started for user: chandana@gmail.com
+2026-02-02 18:55:45 INFO  com.revconnect.service.UserService - Login successful for user: chandana
+2026-02-02 18:55:45 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 18:55:45 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:55:45 INFO  com.revconnect.service.MessageService - MessageService initialized (Default Constructor)
+2026-02-02 18:55:45 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:55:45 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 18:55:45 INFO  com.revconnect.service.CommentService - CommentService initialized
+2026-02-02 18:55:45 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:55:45 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 18:55:45 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 18:55:45 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:55:45 INFO  com.revconnect.service.LikeService - LikeService initialized (Default Constructor)
+2026-02-02 18:55:45 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:55:45 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:55:45 INFO  com.revconnect.ui.UserMenu - UserMenu started for user: chandana (ID: 29)
+2026-02-02 18:55:45 INFO  com.revconnect.ui.UserMenu - Entered User Dashboard
+2026-02-02 18:55:45 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 29
+2026-02-02 18:55:45 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 29 | Count: 6
+2026-02-02 18:55:47 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 2
+2026-02-02 18:55:47 INFO  com.revconnect.ui.UserMenu - Opened Posts Menu
+2026-02-02 18:55:59 INFO  com.revconnect.ui.UserMenu - User 29 creating NORMAL post
+2026-02-02 18:55:59 INFO  com.revconnect.service.PostService - Create post attempt | User ID: 29 | Post Name: coders | Type: NORMAL
+2026-02-02 18:56:00 INFO  com.revconnect.service.PostService - Post created successfully | User ID: 29 | Post Name: coders
+2026-02-02 18:56:00 INFO  com.revconnect.ui.UserMenu - Post creation result: true
+2026-02-02 18:59:06 INFO  com.revconnect.main.RevConnectApp - Database is connected successfully
+2026-02-02 18:59:06 INFO  com.revconnect.main.RevConnectApp - Main menu started
+2026-02-02 18:59:22 INFO  com.revconnect.service.UserService - Login attempt started for user: chandana@gmail.com
+2026-02-02 18:59:22 INFO  com.revconnect.service.UserService - Login successful for user: chandana
+2026-02-02 18:59:22 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 18:59:22 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:59:22 INFO  com.revconnect.service.MessageService - MessageService initialized (Default Constructor)
+2026-02-02 18:59:22 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:59:22 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 18:59:22 INFO  com.revconnect.service.CommentService - CommentService initialized
+2026-02-02 18:59:22 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:59:22 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 18:59:22 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 18:59:22 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:59:22 INFO  com.revconnect.service.LikeService - LikeService initialized (Default Constructor)
+2026-02-02 18:59:22 INFO  com.revconnect.service.ShareService - ShareService initialized (Default Constructor)
+2026-02-02 18:59:22 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:59:22 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 18:59:22 INFO  com.revconnect.ui.UserMenu - UserMenu started for user: chandana (ID: 29)
+2026-02-02 18:59:22 INFO  com.revconnect.ui.UserMenu - Entered User Dashboard
+2026-02-02 18:59:22 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 29
+2026-02-02 18:59:22 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 29 | Count: 6
+2026-02-02 18:59:29 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 2
+2026-02-02 18:59:29 INFO  com.revconnect.ui.UserMenu - Opened Posts Menu
+2026-02-02 18:59:37 INFO  com.revconnect.ui.UserMenu - User 29 attempting to share post 6 with satya
+2026-02-02 18:59:37 INFO  com.revconnect.service.ShareService - Share attempt | User ID: 29 | Post ID: 6
+2026-02-02 18:59:37 INFO  com.revconnect.service.ShareService - Post shared successfully | User ID: 29 | Post ID: 6
+2026-02-02 18:59:37 INFO  com.revconnect.ui.UserMenu - Share result: true
+2026-02-02 19:04:21 INFO  com.revconnect.main.RevConnectApp - Database is connected successfully
+2026-02-02 19:04:21 INFO  com.revconnect.main.RevConnectApp - Main menu started
+2026-02-02 19:04:46 INFO  com.revconnect.service.UserService - Login attempt started for user: chandana@gmail.com
+2026-02-02 19:04:46 INFO  com.revconnect.service.UserService - Login successful for user: chandana
+2026-02-02 19:04:46 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 19:04:46 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 19:04:46 INFO  com.revconnect.service.MessageService - MessageService initialized (Default Constructor)
+2026-02-02 19:04:46 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 19:04:46 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 19:04:46 INFO  com.revconnect.service.CommentService - CommentService initialized
+2026-02-02 19:04:46 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 19:04:46 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 19:04:46 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 19:04:46 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 19:04:46 INFO  com.revconnect.service.LikeService - LikeService initialized (Default Constructor)
+2026-02-02 19:04:46 INFO  com.revconnect.service.ShareService - ShareService initialized (Default Constructor)
+2026-02-02 19:04:46 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 19:04:46 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 19:04:46 INFO  com.revconnect.ui.UserMenu - UserMenu started for user: chandana (ID: 29)
+2026-02-02 19:04:46 INFO  com.revconnect.ui.UserMenu - Entered User Dashboard
+2026-02-02 19:04:46 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 29
+2026-02-02 19:04:46 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 29 | Count: 6
+2026-02-02 19:04:50 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 1
+2026-02-02 19:04:50 INFO  com.revconnect.ui.UserMenu - Opened Profile Menu
+2026-02-02 19:04:50 INFO  com.revconnect.ui.UserMenu - Viewed profile for user: chandana
+2026-02-02 19:04:50 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 29
+2026-02-02 19:04:50 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 29 | Count: 6
+2026-02-02 19:04:54 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 2
+2026-02-02 19:04:54 INFO  com.revconnect.ui.UserMenu - Opened Posts Menu
+2026-02-02 19:05:08 INFO  com.revconnect.service.PostService - Fetching post analytics | Post ID: 6
+2026-02-02 19:05:08 INFO  com.revconnect.service.PostService - Post analytics loaded | Post ID: 6
+2026-02-02 19:05:08 INFO  com.revconnect.service.LikeService - Fetching like count | Post ID: 6
+2026-02-02 19:05:08 INFO  com.revconnect.service.CommentService - Fetching comments | Post ID: 6
+2026-02-02 19:05:08 INFO  com.revconnect.service.CommentService - Comments fetched | Post ID: 6 | Count: 7
+2026-02-02 19:05:08 INFO  com.revconnect.service.ShareService - Fetching share count | Post ID: 6
+2026-02-02 19:05:08 INFO  com.revconnect.service.ShareService - Share count fetched | Post ID: 6 | Count: 2
+2026-02-02 19:05:20 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 29
+2026-02-02 19:05:20 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 29 | Count: 6
+2026-02-02 19:05:23 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 3
+2026-02-02 19:05:23 INFO  com.revconnect.ui.UserMenu - Opened Connections Menu
+2026-02-02 19:05:39 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 29
+2026-02-02 19:05:39 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 29 | Count: 6
+2026-02-02 19:05:45 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 5
+2026-02-02 19:05:45 INFO  com.revconnect.ui.UserMenu - Opened Messages Menu
+2026-02-02 19:05:45 INFO  com.revconnect.ui.UserMenu - Opened Messages Menu
+2026-02-02 19:05:54 INFO  com.revconnect.service.MessageService - Send message started | From: 29 To: 51
+2026-02-02 19:05:54 INFO  com.revconnect.service.MessageService - sendMessage API called | From: 29 To: 51
+2026-02-02 19:05:54 INFO  com.revconnect.service.NotificationService - Creating notification | User ID: 51 | Message: @chandana sent you a message
+2026-02-02 19:05:54 INFO  com.revconnect.service.NotificationService - Notification created successfully | User ID: 51
+2026-02-02 19:05:54 INFO  com.revconnect.service.MessageService - Notification sent to User ID: 51
+2026-02-02 19:05:59 INFO  com.revconnect.ui.UserMenu - Exited Messages Menu
+2026-02-02 19:05:59 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 29
+2026-02-02 19:05:59 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 29 | Count: 6
+2026-02-02 19:06:05 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 7
+2026-02-02 19:06:05 INFO  com.revconnect.ui.UserMenu - Viewed Notifications
+2026-02-02 19:06:05 INFO  com.revconnect.ui.UserMenu - Fetching notifications for user 29
+2026-02-02 19:06:05 INFO  com.revconnect.service.NotificationService - Fetching notifications | User ID: 29
+2026-02-02 19:06:05 INFO  com.revconnect.service.NotificationService - Notifications fetched | User ID: 29 | Count: 6
+2026-02-02 19:06:05 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 29
+2026-02-02 19:06:05 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 29 | Count: 6
+2026-02-02 19:06:11 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 8
+2026-02-02 19:06:11 INFO  com.revconnect.ui.UserMenu - Opened Creator/Business Menu
+2026-02-02 19:06:11 INFO  com.revconnect.ui.UserMenu - Viewed profile for user: chandana
+2026-02-02 19:06:29 INFO  com.revconnect.service.NotificationService - Fetching unread count | User ID: 29
+2026-02-02 19:06:29 INFO  com.revconnect.service.NotificationService - Unread count result | User ID: 29 | Count: 6
+2026-02-02 19:06:31 INFO  com.revconnect.ui.UserMenu - Dashboard choice selected: 9
+2026-02-02 19:06:31 INFO  com.revconnect.ui.UserMenu - User logged out: chandana
+2026-02-02 19:06:48 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 19:06:48 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 19:06:48 INFO  com.revconnect.service.CommentService - CommentService initialized
+2026-02-02 19:06:48 INFO  com.revconnect.service.CommentService - Add comment attempt | User ID: 1 | Post ID: 5
+2026-02-02 19:06:48 INFO  com.revconnect.service.CommentService - Comment added successfully | Comment: Nice post
+2026-02-02 19:06:48 INFO  com.revconnect.service.PostService - Fetching post owner | Post ID: 5
+2026-02-02 19:06:48 INFO  com.revconnect.service.PostService - Post owner found | Post ID: 5 | Owner ID: -1
+2026-02-02 19:06:48 INFO  com.revconnect.service.NotificationService - Creating notification | User ID: -1 | Message: @user_1 commented on your post: "Nice post"
+2026-02-02 19:06:48 INFO  com.revconnect.service.NotificationService - Notification created successfully | User ID: -1
+2026-02-02 19:06:48 INFO  com.revconnect.service.CommentService - Comment notification sent | From User ID: 1 | To User ID: -1
+2026-02-02 19:06:48 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 19:06:48 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 19:06:48 INFO  com.revconnect.service.CommentService - CommentService initialized
+2026-02-02 19:06:48 INFO  com.revconnect.service.CommentService - Fetching comments | Post ID: 5
+2026-02-02 19:06:48 INFO  com.revconnect.service.CommentService - Comments fetched | Post ID: 5 | Count: 1
+2026-02-02 19:06:48 INFO  com.revconnect.service.NotificationService - NotificationService initialized (Default Constructor)
+2026-02-02 19:06:48 INFO  com.revconnect.service.PostService - PostService initialized (Default Constructor)
+2026-02-02 19:06:48 INFO  com.revconnect.service.CommentService - CommentService initialized
+2026-02-02 19:06:48 INFO  com.revconnect.service.CommentService - Delete comment attempt | Comment ID: 10 | User ID: 1
+2026-02-02 19:06:48 INFO  com.revconnect.service.CommentService - Comment deleted successfully | Comment ID: 10

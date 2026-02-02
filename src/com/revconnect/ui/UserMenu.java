@@ -2,7 +2,6 @@ package com.revconnect.ui;
 
 import java.util.List;
 import java.util.Scanner;
-
 import com.revconnect.model.BusinessProduct;
 import com.revconnect.model.CreatorBusinessProfile;
 import com.revconnect.model.Notification;
@@ -21,14 +20,15 @@ import com.revconnect.service.ShareService;
 import com.revconnect.service.UserService;
 import com.revconnect.service.PinnedPostService;
 import com.revconnect.model.UserConnection;
+import org.apache.log4j.Logger;
 
 
 public class UserMenu {
+	private static final Logger logger = Logger.getLogger(UserMenu.class);
 	private String senderName;
-
+	
     private User loggedInUser;
     private Scanner sc = new Scanner(System.in);
-
     private PostService postService = new PostService();
     private UserService user = new UserService();
     private MessageService messageService = new MessageService();
@@ -44,10 +44,13 @@ public class UserMenu {
 
     public UserMenu(User user) {
         this.loggedInUser = user;
+        logger.info("UserMenu started for user: " + user.getUsername() +
+                " (ID: " + user.getUserId() + ")");
     }
 
     // ===================== MAIN MENU =====================
     public void showMenu() {
+    	 logger.info("Entered User Dashboard");
 
         while (true) {
 
@@ -68,38 +71,50 @@ public class UserMenu {
 
             System.out.print("Choose: ");
             int choice = readInt();
-
+            
+            logger.info("Dashboard choice selected: " + choice);
+            
             switch (choice) {
-                case 1:
-                    profileMenu();
-                    break;
-                case 2:
-                    postsMenu();
-                    break;
-                case 3:
-                    connectionsMenu();
-                    break;
-                case 4:
-                    followMenu();
-                    break;
-                case 5:
-                    messagesMenu();
-                    break;
-                case 6:
-                    commentsMenu();
-                    break;
-                case 7:
-                    viewNotifications();
-                    break;
-                case 8:
-                    creatorMenu();
-                    break;
-                case 9:
-                    System.out.println("Logged out successfully");
-                    return;
-                default:
-                    System.out.println("Invalid choice");
-            }
+            case 1:
+                logger.info("Opened Profile Menu");
+                profileMenu();
+                break;
+            case 2:
+                logger.info("Opened Posts Menu");
+                postsMenu();
+                break;
+            case 3:
+                logger.info("Opened Connections Menu");
+                connectionsMenu();
+                break;
+            case 4:
+                logger.info("Opened Follow Menu");
+                followMenu();
+                break;
+            case 5:
+                logger.info("Opened Messages Menu");
+                messagesMenu();
+                break;
+            case 6:
+                logger.info("Opened Likes & Comments Menu");
+                commentsMenu();
+                break;
+            case 7:
+                logger.info("Viewed Notifications");
+                viewNotifications();
+                break;
+            case 8:
+                logger.info("Opened Creator/Business Menu");
+                creatorMenu();
+                break;
+            case 9:
+                logger.info("User logged out: " + loggedInUser.getUsername());
+                System.out.println("Logged out successfully");
+                return;
+            default:
+                logger.warn("Invalid dashboard choice: " + choice);
+                System.out.println("Invalid choice");
+           }
         }
     }
 
@@ -108,6 +123,7 @@ public class UserMenu {
         try {
             return Integer.parseInt(sc.nextLine());
         } catch (Exception e) {
+        	logger.warn("Invalid number input");
             return -1;
         }
     }
@@ -189,6 +205,7 @@ public class UserMenu {
     // ===================== CREATE NORMAL POST =====================
     private void createPost() {
 
+    	try{
         System.out.print("Enter post name: ");
         String postName = sc.nextLine().trim();
 
@@ -196,9 +213,11 @@ public class UserMenu {
         String content = sc.nextLine().trim();
 
         if (postName.isEmpty() || content.isEmpty()) {
+            logger.warn("Post creation failed: empty fields");
             System.out.println("Post name and content cannot be empty.");
             return;
         }
+        logger.info("User " + loggedInUser.getUserId() + " creating NORMAL post");
 
         boolean success = postService.createPost(
                 loggedInUser.getUserId(),
@@ -206,9 +225,14 @@ public class UserMenu {
                 content,
                 "NORMAL"
         );
+        logger.info("Post creation result: " + success);
+
 
         System.out.println(success ? "Post created successfully!" : "Failed to create post");
+    }catch (Exception e) {
+        logger.error("Error while creating post", e);
     }
+}
 
     // ===================== CREATE PROMOTIONAL POST =====================
     private void createPromoPost() {
@@ -416,7 +440,7 @@ public class UserMenu {
 
     // ===================== PROFILE =====================
     private void profileMenu() {
-
+        logger.info("Viewed profile for user: " + loggedInUser.getUsername());
         System.out.println("\n--- My Profile ---");
         System.out.println("Username: " + loggedInUser.getUsername());
         System.out.println("User ID: " + loggedInUser.getUserId());
@@ -425,7 +449,7 @@ public class UserMenu {
 
     // ===================== CREATOR MENU =====================
     private void creatorMenu() {
-
+    	 logger.info("Viewed profile for user: " + loggedInUser.getUsername());
         while (true) {
 
             System.out.println("\n--- Creator / Business Profile ---");
@@ -620,6 +644,9 @@ public class UserMenu {
 
     // ===================== NOTIFICATIONS =====================
     private void viewNotifications() {
+    	
+    	   logger.info("Fetching notifications for user " +
+                   loggedInUser.getUserId());
 
         List<Notification> list = notificationService.getMyNotifications(
                 loggedInUser.getUserId()
@@ -656,14 +683,18 @@ public class UserMenu {
 
             switch (choice) {
 
-                case 1:
-                    System.out.print("Enter Post ID: ");
-                    likeService.likePost(
-                            loggedInUser.getUserId(),
-                            readInt()
-                    );
-                    break;
+            case 1:
+                System.out.print("Enter Post ID: ");
+                int pid = readInt();
 
+                logger.info("User " + loggedInUser.getUserId()
+                        + " liked post " + pid);
+
+                likeService.likePost(
+                        loggedInUser.getUserId(),
+                        pid
+                );
+                break;
                 case 2:
                     System.out.print("Enter Post ID: ");
                     boolean removed = likeService.unlikePost(
@@ -697,7 +728,7 @@ public class UserMenu {
 
                 case 4:
                     System.out.print("Enter Post ID: ");
-                    int pid = readInt();
+                     pid = readInt();
 
                     List<com.revconnect.model.Comment> list =
                             commentService.getCommentsByPost(pid);
@@ -757,9 +788,11 @@ public class UserMenu {
                     break;
 
                 case 9:
+                	logger.info("Exited Likes & Comments Menu");
                     return;
 
                 default:
+                	logger.warn("Invalid comments menu choice: " + choice);
                     System.out.println("Invalid choice");
             }
         }
@@ -768,37 +801,51 @@ public class UserMenu {
     // ===================== SHARE =====================
     private void sharePost() {
 
-        System.out.print("Enter Post ID to share: ");
-        int postId = readInt();
 
-        System.out.print("Enter username to share with: ");
-        String targetUser = sc.nextLine().trim();
+        try {
+            System.out.print("Enter Post ID to share: ");
+            int postId = readInt();
 
-        if (targetUser.isEmpty()) {
-            System.out.println("Username cannot be empty.");
-            return;
-        }
+            System.out.print("Enter username to share with: ");
+            String targetUser = sc.nextLine().trim();
 
-        // Get target user from DB
-        User receiver = user.getUserByUsername(targetUser);
+            logger.info("User " + loggedInUser.getUserId() +
+                    " attempting to share post " + postId +
+                    " with " + targetUser);
 
-        if (receiver == null) {
-            System.out.println("User not found.");
-            return;
-        }
+            if (targetUser.isEmpty()) {
+                logger.warn("Share failed: empty username");
+                System.out.println("Username cannot be empty.");
+                return;
+            }
 
-        // Save share in SHARES table
-        boolean shared = shareService.sharePost(
-            postId,
-            loggedInUser.getUserId()
-        );
+            User receiver = user.getUserByUsername(targetUser);
 
-        if (shared) {
-            System.out.println("Post shared successfully with " + targetUser);
-        } else {
-            System.out.println("Failed to share post.");
+            if (receiver == null) {
+                logger.warn("Share failed: user not found -> " + targetUser);
+                System.out.println("User not found.");
+                return;
+            }
+
+            boolean shared = shareService.sharePost(
+                    postId,
+                    loggedInUser.getUserId()
+            );
+
+            logger.info("Share result: " + shared);
+
+            if (shared) {
+                System.out.println("Post shared successfully with " + targetUser);
+            } else {
+                System.out.println("Failed to share post.");
+            }
+
+        } catch (Exception e) {
+            logger.error("Error while sharing post", e);
         }
     }
+
+    
 
     // ===================== CONNECTIONS =====================
     private void connectionsMenu() {
@@ -958,7 +1005,7 @@ public class UserMenu {
     }
     // ===================== FOLLOW =====================
     private void followMenu() {
-
+        logger.info("Opened Follow Menu");
         while (true) {
 
             System.out.println("\n--- Follow System ---");
@@ -1042,9 +1089,11 @@ public class UserMenu {
 
 
                 case 5:
+                	logger.info("Exited Follow Menu");
                     return;
 
                 default:
+                	logger.warn("Invalid follow menu choice: " + choice);
                     System.out.println("Invalid choice");
             }
         }
@@ -1052,7 +1101,7 @@ public class UserMenu {
 
     // ===================== MESSAGES =====================
     private void messagesMenu() {
-
+        logger.info("Opened Messages Menu");
         while (true) {
             System.out.println("\n--- Messages ---");
             System.out.println("1. Send Message");
@@ -1115,9 +1164,11 @@ public class UserMenu {
                     break;
 
                 case 3:
+                    logger.info("Exited Messages Menu");
                     return;
 
                 default:
+                    logger.warn("Invalid messages menu choice: " + choice);
                     System.out.println("Invalid choice");
             }
         }
@@ -1129,6 +1180,8 @@ public class UserMenu {
 
     public void setSenderName(String senderName) {
         this.senderName = senderName;
+        logger.info("Sender name updated: " + senderName);
+
     }
 
 }
